@@ -2,4 +2,4 @@
 
 set -exu
 
-cat 'That worked'
+'That worked'
