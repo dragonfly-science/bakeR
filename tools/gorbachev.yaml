@@ -1,0 +1,3 @@
+docker: docker.dragonfly.co.nz/dragonverse-18.04
+memory: 1
+cpus: 1
