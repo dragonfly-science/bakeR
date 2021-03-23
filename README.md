@@ -23,7 +23,7 @@ pars = list(Run1 = list(pars = list(Env1 = "This_env",
                         wants = list(Upstram_job = 2222), 
                         requires = list(Upstream_job2 = 4321)))
                         
-gateaux_job_runner(fun, 
+gateaux_job_runner(pars, 
                    report_name = "bakeR-testreport",
                    JWT = JWT)
 ```
