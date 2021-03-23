@@ -2,4 +2,4 @@
 
 set -exu
 
-'That worked'
+echo "That worked!"
