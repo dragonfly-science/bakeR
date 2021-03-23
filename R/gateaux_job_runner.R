@@ -14,8 +14,11 @@
 #' @author Dragonfly bakery
 #' @return JSON API return
 #' @examples
-#' pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstram_job = 1234), requires = list(Upstream_job2 = 4321)),
-#'             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstram_job = 2222), requires = list(Upstream_job2 = 4321)))
+#' pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
+#'             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+#' gateaux_job_runner(pars,
+#'                    report_name = "bakeR-testreport",
+#'                    JWT = JWT)
 #' @export
 
 gateaux_job_runner <- function(pars_list = NULL,
@@ -44,7 +47,7 @@ gateaux_job_runner <- function(pars_list = NULL,
     } else {wants = ''}
 
     if(length(pars_list[[l]]$requires)>0){
-      requires = lapply(1:length(pars_list[[l]]$requires), function(ll) sprintf('"%s":"%s"',names(pars_list[[l]]$requires)[ll],as.character(pars_list[[l]]$requires[ll][[1]])))
+      requires = lapply(1:length(pars_list[[l]]$requires), function(ll) sprintf('"%s:%s"',names(pars_list[[l]]$requires)[ll],as.character(pars_list[[l]]$requires[ll][[1]])))
       requires = paste(unlist(requires), collapse = ',')
       requires = paste0(', "requires":[',requires,']')
     } else {requires = ''}
@@ -59,7 +62,7 @@ gateaux_job_runner <- function(pars_list = NULL,
 
     ret <- system(call,intern=T)
     if(log_jobs){
-      parse_joblist(jsonlite::fromJSON(ret), prefix = prefix, append = append)
+      readr::write_csv(jsonlite::fromJSON(ret),path = paste0(prefix,'-joblist.csv'),append = append)
     } else {jsonlite::fromJSON(ret)}
   }
 )
@@ -67,19 +70,4 @@ gateaux_job_runner <- function(pars_list = NULL,
 }
 
 
-
-#' Call arbitrary gateaux jobs from R
-#'
-#' @param json_ret return string from gateaux API
-#' @param prefix for the list, can include path
-#' @param append append to existing file?
-#' @author Dragonfly bakery
-
-parse_joblist <- function(json_ret, prefix, append=T){
-  runlist <- do.call('rbind',lapply(json_ret,function(r) unlist(c(r[c('commit_message','triggered_by','db_now','id')],r$parameters[c('triggers','env','requires')]))))
-
-  runlist <- as_tibble(runlist)
-
-  readr::write_csv(paste0(runlist,'-joblist.csv'),append = append)
-}
 
