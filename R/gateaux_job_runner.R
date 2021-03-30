@@ -33,7 +33,7 @@ gateaux_job_runner <- function(pars_list = NULL,
 
   ret <- lapply(1:length(pars_list),function(l){
 
-    tag = sprintf('"%s":"%s"',"TAG:",names(pars_list[l]))
+    tag = sprintf('"%s":"%s"',"TAG",names(pars_list[l]))
     if(length(pars_list[[l]]$pars)>0){
     envs = lapply(1:length(pars_list[[l]]$pars), function(ll) sprintf('"%s":"%s"',names(pars_list[[l]]$pars)[ll],pars_list[[l]]$pars[ll]))
     envs = paste(unlist(envs), collapse = ',')
