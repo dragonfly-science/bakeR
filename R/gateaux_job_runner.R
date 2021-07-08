@@ -35,9 +35,9 @@ gateaux_job_runner <- function(pars_list = NULL,
 
     tag = sprintf('"%s":"%s"',"TAG",names(pars_list[l]))
     if(length(pars_list[[l]]$pars)>0){
-    envs = lapply(1:length(pars_list[[l]]$pars), function(ll) sprintf('"%s":"%s"',names(pars_list[[l]]$pars)[ll],pars_list[[l]]$pars[ll]))
-    envs = paste(unlist(envs), collapse = ',')
-    envs = paste(tag, envs, sep=',')
+      envs = lapply(1:length(pars_list[[l]]$pars), function(ll) sprintf('"%s":"%s"',names(pars_list[[l]]$pars)[ll],pars_list[[l]]$pars[ll]))
+      envs = paste(unlist(envs), collapse = ',')
+      envs = paste(tag, envs, sep=',')
     } else {envs = tag}
 
     if(length(pars_list[[l]]$wants)>0){
@@ -52,22 +52,44 @@ gateaux_job_runner <- function(pars_list = NULL,
       requires = paste0(', "requires":[',requires,']')
     } else {requires = ''}
 
-   call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{"env":{%s} %s %s}\' %s',
-                   JWT,
-                   envs,
-                   wants,
-                   requires,
-                   call_url
-                   )
+    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{"env":{%s} %s %s}\' %s',
+                    JWT,
+                    envs,
+                    wants,
+                    requires,
+                    call_url
+    )
 
     ret <- system(call,intern=T)
     if(log_jobs){
       readr::write_csv(jsonlite::fromJSON(ret),path = paste0(prefix,'-joblist.csv'),append = append)
     } else {jsonlite::fromJSON(ret)}
   }
-)
+  )
 
 }
 
 
+#' Modify par list to run all jubs listed with a certain env variable - useful to temporarily try or alter a parameter setup without modifying the original setup
+#'
+#' @param pars_list A named list of named lists of environment variables and job requirements - one list per job.
+#' Each named list defines a job tag (name), with up to three sub-lists:
+#'     *  pars (named environment variables passed to the job),
+#'     *  wants (named optional job dependencies),
+#'     *  requires (named required job dependencies).
+#' @param var env variable to create or alter.
+#' @param value env variable value to assign. Can be a single value or a vector or the same length as pars_list.
+#' @author Dragonfly bakery
+#' @return JSON API return
+#' @export
+
+run_all_with <- function(pars_list, var, value){
+
+  if(length(var)==1){
+    lapply(pars_list, function(l) {l$pars[[var]] <- value; l})
+  } else {
+    lapply(1:length(pars_list), function(l) {pars_list[[l]]$pars[[var]] <- value[l]; pars_list[[l]]})
+  }
+
+}
 
