@@ -85,11 +85,7 @@ gateaux_job_runner <- function(pars_list = NULL,
 
 run_all_with <- function(pars_list, var, value){
 
-  if(length(var)==1){
-    lapply(pars_list, function(l) {l$pars[[var]] <- value; l})
-  } else {
-    lapply(1:length(pars_list), function(l) {pars_list[[l]]$pars[[var]] <- value[l]; pars_list[[l]]})
-  }
+    lapply(pars_list, function(l) {for(s in 1:length(var)) {l$pars[var[s]] <- value[s]};l})
 
 }
 
