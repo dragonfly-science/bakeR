@@ -30,10 +30,13 @@ gateaux_job_runner <- function(pars_list = NULL,
                                log_jobs = T,
                                prefix = 'jobs',
                                append = TRUE,
-                               cpus, memory){
+                               cpus = '',
+                               memory = ''){
 
-  call_url <- paste0("https://",server,"/job/",report_name)
-
+    call_url <- paste0("https://",server,"/job/",report_name)
+    if(cpus != '') cpus <- sprintf('"cpus":%s, ',  cpus)
+    if(memory != '') memory <- sprintf('"memory":%s, ', memory)    
+    
   ret <- lapply(1:length(pars_list),function(l){
 
     tag = sprintf('"%s":"%s"',"TAG",names(pars_list[l]))
@@ -55,18 +58,17 @@ gateaux_job_runner <- function(pars_list = NULL,
       requires = paste0(', "requires":[',requires,']')
     } else {requires = ''}
 
-      if(!missing(cpus)) cpus <- sprintf('-d cpus=%s ', cpus) else cpus <- ''      
-      if(!missing(memory)) memory <- sprintf('-d memory=%s ', memory) else memory <- ''
-
-    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" %s%s-d \'{"env":{%s} %s %s}\' %s',
+    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{%s%s"env":{%s} %s %s}\' %s',
                     JWT,
-                    cpus
+                    cpus,
                     memory,
                     envs,
                     wants,
                     requires,
                     call_url
-    )
+                    )
+
+      print(call)
 
     ret <- system(call,intern=T)
     if(log_jobs){
