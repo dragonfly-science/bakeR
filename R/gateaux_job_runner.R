@@ -11,6 +11,8 @@
 #' @param log_jobs Export job parameters to logfile?
 #' @param prefix for the list, can include path
 #' @param append append to existing file?
+#' @param cpus cpus for apparatchik, will override any gorbachev.yaml settings
+#' @param memory memory for apparatchik, will override any gorbachev.yaml settings#' 
 #' @author Dragonfly bakery
 #' @return JSON API return
 #' @examples
@@ -27,7 +29,8 @@ gateaux_job_runner <- function(pars_list = NULL,
                                JWT,
                                log_jobs = T,
                                prefix = 'jobs',
-                               append = T){
+                               append = TRUE,
+                               cpus, memory){
 
   call_url <- paste0("https://",server,"/job/",report_name)
 
@@ -52,8 +55,13 @@ gateaux_job_runner <- function(pars_list = NULL,
       requires = paste0(', "requires":[',requires,']')
     } else {requires = ''}
 
-    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{"env":{%s} %s %s}\' %s',
+      if(!missing(cpus)) cpus <- sprintf('-d cpus=%s ', cpus) else cpus <- ''      
+      if(!missing(memory)) memory <- sprintf('-d memory=%s ', memory) else memory <- ''
+
+    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" %s%s-d \'{"env":{%s} %s %s}\' %s',
                     JWT,
+                    cpus
+                    memory,
                     envs,
                     wants,
                     requires,
