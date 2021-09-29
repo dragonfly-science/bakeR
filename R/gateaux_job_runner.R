@@ -12,7 +12,7 @@
 #' @param prefix for the list, can include path
 #' @param append append to existing file?
 #' @param cpus cpus for apparatchik, will override any gorbachev.yaml settings
-#' @param memory memory for apparatchik, will override any gorbachev.yaml settings#' 
+#' @param memory memory for apparatchik, will override any gorbachev.yaml settings#'
 #' @author Dragonfly bakery
 #' @return JSON API return
 #' @examples
@@ -35,8 +35,8 @@ gateaux_job_runner <- function(pars_list = NULL,
 
     call_url <- paste0("https://",server,"/job/",report_name)
     if(cpus != '') cpus <- sprintf('"cpus":%s, ',  cpus)
-    if(memory != '') memory <- sprintf('"memory":%s, ', memory)    
-    
+    if(memory != '') memory <- sprintf('"memory":%s, ', memory)
+
   ret <- lapply(1:length(pars_list),function(l){
 
     tag = sprintf('"%s":"%s"',"TAG",names(pars_list[l]))
@@ -72,7 +72,9 @@ gateaux_job_runner <- function(pars_list = NULL,
 
     ret <- system(call,intern=T)
     if(log_jobs){
-      readr::write_csv(jsonlite::fromJSON(ret),path = paste0(prefix,'-joblist.csv'),append = append)
+      rr <- jsonlite::fromJSON(ret)
+      rr <- bind_cols(rr %>% select(-parameters),rr$parameters)
+      readr::write_csv(rr,path = paste0(prefix,'-joblist.csv'),append = append)
     } else {jsonlite::fromJSON(ret)}
   }
   )
