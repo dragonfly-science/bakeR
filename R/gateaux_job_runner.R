@@ -72,9 +72,11 @@ gateaux_job_runner <- function(pars_list = NULL,
 
     ret <- system(call,intern=T)
     if(log_jobs){
+
       rr <- jsonlite::fromJSON(ret)
       rr <- bind_cols(rr %>% select(-parameters),rr$parameters)
-      readr::write_csv(rr,path = paste0(prefix,'-joblist.csv'),append = append)
+      rr <- bind_cols(rr %>% select(-env),rr$env)
+      readr::write_csv(rr%>% select(-variant),path = paste0(prefix,'-joblist.csv'),append = append)
     } else {jsonlite::fromJSON(ret)}
   }
   )
