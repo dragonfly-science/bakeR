@@ -21,7 +21,9 @@
 #' gateaux_job_runner(pars,
 #'                    report_name = "bakeR-testreport",
 #'                    JWT = JWT)
+#' @importFrom magrittr %>%
 #' @export
+magrittr::`%>%`
 
 gateaux_job_runner <- function(pars_list = NULL,
                                report_name,
