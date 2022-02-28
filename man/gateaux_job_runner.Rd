@@ -11,7 +11,9 @@ gateaux_job_runner(
   JWT,
   log_jobs = T,
   prefix = "jobs",
-  append = T
+  append = TRUE,
+  cpus = "",
+  memory = ""
 )
 }
 \arguments{
@@ -30,6 +32,10 @@ Each named list defines a job tag (name), with up to three sub-lists:
 \item{prefix}{for the list, can include path}
 
 \item{append}{append to existing file?}
+
+\item{cpus}{cpus for apparatchik, will override any gorbachev.yaml settings}
+
+\item{memory}{memory for apparatchik, will override any gorbachev.yaml settings#'}
 
 \item{Server}{The gateaux server url to use. defaults to gorbachev.io}
 }
