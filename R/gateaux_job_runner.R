@@ -21,7 +21,9 @@
 #' gateaux_job_runner(pars,
 #'                    report_name = "bakeR-testreport",
 #'                    JWT = JWT)
+#' @importFrom magrittr %>%
 #' @export
+magrittr::`%>%`
 
 gateaux_job_runner <- function(pars_list = NULL,
                                report_name,
@@ -74,8 +76,8 @@ gateaux_job_runner <- function(pars_list = NULL,
     if(log_jobs){
 
       rr <- jsonlite::fromJSON(ret)
-      rr <- bind_cols(rr %>% select(-parameters),rr$parameters)
-      rr <- bind_cols(rr %>% select(-env),rr$env)
+      rr <- dplyr::bind_cols(rr %>% select(-parameters),rr$parameters)    # added 'dplyr::' to solve a error message: could not find function "bind_cols"
+      rr <- dplyr::bind_cols(rr %>% select(-env),rr$env)                  # added 'dplyr::' to solve a error message: could not find function "bind_cols"
       readr::write_csv(rr%>% select(-variant),path = paste0(prefix,'-joblist.csv'),append = append)
     } else {jsonlite::fromJSON(ret)}
   }
