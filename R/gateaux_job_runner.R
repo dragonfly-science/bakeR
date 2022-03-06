@@ -99,9 +99,13 @@ gateaux_job_runner <- function(pars_list = NULL,
 #' @return JSON API return
 #' @export
 
-run_all_with <- function(pars_list, var, value, set=pars){
+run_all_with <- function(pars_list, var, value, set="pars",rm_vals=F){
 
-    lapply(pars_list, function(l) {for(s in 1:length(var)) {l$`!!set`[var[s]] <- value[s]};l})
+  if(!rm_vals){
+    lapply(pars_list, function(l) {for(s in 1:length(var)) {l[[set]][var[s]] <- value[s]};l})
+  } else {
+    lapply(pars_list, function(l) {l[[set]]<- NULL;l})
+  }
 
 }
 
