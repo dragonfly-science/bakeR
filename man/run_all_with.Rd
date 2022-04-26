@@ -2,9 +2,10 @@
 % Please edit documentation in R/gateaux_job_runner.R
 \name{run_all_with}
 \alias{run_all_with}
-\title{Modify par list to run all jubs listed with a certain env variable - useful to temporarily try or alter a parameter setup without modifying the original setup}
+\title{Modify par list to run all jobs listed with a certain env variable -
+useful to temporarily try or alter a parameter setup without modifying the original setup}
 \usage{
-run_all_with(pars_list, var, value)
+run_all_with(pars_list, var, value, set = "pars", rm_vals = F)
 }
 \arguments{
 \item{pars_list}{A named list of named lists of environment variables and job requirements - one list per job.
@@ -18,10 +19,11 @@ Each named list defines a job tag (name), with up to three sub-lists:
 \item{value}{env variable value to assign. Can be a single value or a vector or the same length as pars_list.}
 }
 \value{
-JSON API return
+Altered parameter list to run with gateaux_job_runner
 }
 \description{
-Modify par list to run all jubs listed with a certain env variable - useful to temporarily try or alter a parameter setup without modifying the original setup
+Modify par list to run all jobs listed with a certain env variable -
+useful to temporarily try or alter a parameter setup without modifying the original setup
 }
 \author{
 Dragonfly bakery

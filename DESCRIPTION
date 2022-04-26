@@ -6,7 +6,7 @@ Author: Philipp Neubauer
 Maintainer: Philipp Neubauer <philipp@dragonfly.comnz>
 Description: Ever wanted to just launch jobs on Gorbi from R? Now you can do that with minimal overhead! Supports env variables, wants and requires statements.
 License: DF
-Imports: jsonlite, readr
+Imports: jsonlite, readr, magrittr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

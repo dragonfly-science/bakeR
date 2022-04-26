@@ -2,3 +2,4 @@
 
 export(gateaux_job_runner)
 export(run_all_with)
+importFrom(magrittr,"%>%")
