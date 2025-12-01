@@ -7,7 +7,7 @@
 #'     *  requires (named required job dependencies).
 #' @param report_name The name of the job
 #' @param JWT String: Authentication token.
-#' @param Server The gateaux server url to use. defaults to gorbachev.io
+#' @param server The gateaux server url to use. defaults to gorbachev.io
 #' @param log_jobs Export job parameters to logfile?
 #' @param prefix for the list, can include path
 #' @param append append to existing file?
@@ -78,9 +78,9 @@ gateaux_job_runner <- function(pars_list = NULL,
     if(log_jobs){
 
       rr <- jsonlite::fromJSON(ret)
-      rr <- dplyr::bind_cols(rr %>% select(-parameters),rr$parameters)    # added 'dplyr::' to solve a error message: could not find function "bind_cols"
-      rr <- dplyr::bind_cols(rr %>% select(-env),rr$env)                  # added 'dplyr::' to solve a error message: could not find function "bind_cols"
-      readr::write_csv(rr%>% select(-variant),path = paste0(prefix,'-joblist.csv'),append = append)
+      rr <- dplyr::bind_cols(rr %>% dplyr::select(-parameters), rr$parameters)    # added 'dplyr::' to solve a error message: could not find function "bind_cols"
+      rr <- dplyr::bind_cols(rr %>% dplyr::select(-env), rr$env)                  # added 'dplyr::' to solve a error message: could not find function "bind_cols"
+      readr::write_csv(rr%>% dplyr::select(-variant), file = paste0(prefix,'-joblist.csv'), append = append)
     } else {
       jsonlite::fromJSON(ret)
       }
