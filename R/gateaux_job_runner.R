@@ -16,77 +16,113 @@
 #' @author Dragonfly bakery
 #' @return JSON API return
 #' @examples
-#' pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-#'             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+#' pars <- list(
+#'   Run1 = list(
+#'     pars = list(Env1 = "This_env", Env2 = "That_env"),
+#'     wants = list(Upstream_job = 1234),
+#'     requires = list(Upstream_job2 = 4321)
+#'   ),
+#'   Run2 = list(
+#'     pars = list(Env1 = "That_env", Env2 = "This_env"),
+#'     wants = list(Upstream_job = 2222),
+#'     requires = list(Upstream_job2 = 4321)
+#'   )
+#' )
 #' gateaux_job_runner(pars,
-#'                    report_name = "bakeR-testreport",
-#'                    JWT = JWT)
+#'   report_name = "bakeR-testreport",
+#'   JWT = JWT
+#' )
 #' @importFrom magrittr %>%
 #' @export
 
 gateaux_job_runner <- function(pars_list = NULL,
                                report_name,
-                               server = 'gorbachev.io',
+                               server = "gorbachev.io",
                                JWT,
-                               log_jobs = T,
-                               prefix = 'jobs',
+                               log_jobs = TRUE,
+                               prefix = "jobs",
                                append = TRUE,
-                               cpus = '',
-                               memory = ''){
+                               cpus = "",
+                               memory = "") {
+  call_url <- paste0("https://", server, "/job/", report_name)
+  if (cpus != "") cpus <- sprintf('"cpus":%s, ', cpus)
+  if (memory != "") memory <- sprintf('"memory":%s, ', memory)
 
-    call_url <- paste0("https://",server,"/job/",report_name)
-    if(cpus != '') cpus <- sprintf('"cpus":%s, ',  cpus)
-    if(memory != '') memory <- sprintf('"memory":%s, ', memory)
+  ret <- lapply(seq_along(pars_list), function(l) {
+    tag <- sprintf('"%s":"%s"', "TAG", names(pars_list[l]))
+    if (length(pars_list[[l]]$pars) > 0) {
+      envs <- lapply(
+        seq_along(pars_list[[l]]$pars),
+        function(ll) {
+          sprintf(
+            '"%s":"%s"',
+            names(pars_list[[l]]$pars)[ll], pars_list[[l]]$pars[ll]
+          )
+        }
+      )
+      envs <- paste(unlist(envs), collapse = ",")
+      envs <- paste(tag, envs, sep = ",")
+    } else {
+      envs <- tag
+    }
 
-  ret <- lapply(1:length(pars_list),function(l){
+    if (length(pars_list[[l]]$wants) > 0) {
+      wants <- lapply(
+        seq_along(pars_list[[l]]$wants),
+        function(ll) {
+          sprintf(
+            '"%s:%s"',
+            names(pars_list[[l]]$wants)[ll],
+            as.character(pars_list[[l]]$wants[ll][[1]])
+          )
+        }
+      )
+      wants <- paste(unlist(wants), collapse = ",")
+      wants <- paste0(', "wants":[', wants, "]")
+    } else {
+      wants <- ""
+    }
 
-    tag = sprintf('"%s":"%s"',"TAG",names(pars_list[l]))
-    if(length(pars_list[[l]]$pars)>0){
-      envs = lapply(1:length(pars_list[[l]]$pars),
-                    function(ll) sprintf('"%s":"%s"',names(pars_list[[l]]$pars)[ll],pars_list[[l]]$pars[ll]))
-      envs = paste(unlist(envs), collapse = ',')
-      envs = paste(tag, envs, sep=',')
-    } else {envs = tag}
+    if (length(pars_list[[l]]$requires) > 0) {
+      requires <- lapply(
+        seq_along(pars_list[[l]]$requires),
+        function(ll) {
+          sprintf(
+            '"%s:%s"',
+            names(pars_list[[l]]$requires)[ll],
+            as.character(pars_list[[l]]$requires[ll][[1]])
+          )
+        }
+      )
+      requires <- paste(unlist(requires), collapse = ",")
+      requires <- paste0(', "requires":[', requires, "]")
+    } else {
+      requires <- ""
+    }
 
-    if(length(pars_list[[l]]$wants)>0){
-      wants = lapply(1:length(pars_list[[l]]$wants),
-                     function(ll) sprintf('"%s:%s"',names(pars_list[[l]]$wants)[ll],as.character(pars_list[[l]]$wants[ll][[1]])))
-      wants = paste(unlist(wants), collapse = ',')
-      wants = paste0(', "wants":[',wants,']')
-    } else {wants = ''}
+    call <- sprintf(
+      'curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{%s%s"env":{%s} %s %s}\' %s',
+      JWT,
+      cpus,
+      memory,
+      envs,
+      wants,
+      requires,
+      call_url
+    )
 
-    if(length(pars_list[[l]]$requires)>0){
-      requires = lapply(1:length(pars_list[[l]]$requires),
-                        function(ll) sprintf('"%s:%s"',names(pars_list[[l]]$requires)[ll],as.character(pars_list[[l]]$requires[ll][[1]])))
-      requires = paste(unlist(requires), collapse = ',')
-      requires = paste0(', "requires":[',requires,']')
-    } else {requires = ''}
+    print(call)
 
-    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{%s%s"env":{%s} %s %s}\' %s',
-                    JWT,
-                    cpus,
-                    memory,
-                    envs,
-                    wants,
-                    requires,
-                    call_url
-                    )
-
-      print(call)
-
-    ret <- system(call,intern=T)
-    if(log_jobs){
-
+    ret <- system(call, intern = TRUE)
+    if (log_jobs) {
       rr <- jsonlite::fromJSON(ret)
-      rr <- dplyr::bind_cols(rr %>% dplyr::select(-parameters),rr$parameters)
-      rr <- dplyr::bind_cols(rr %>% dplyr::select(-env),rr$env)
-      readr::write_csv(rr %>% dplyr::select(-variant), file = paste0(prefix,'-joblist.csv'), append = append)
+      rr <- dplyr::bind_cols(rr %>% dplyr::select(-parameters), rr$parameters)
+      rr <- dplyr::bind_cols(rr %>% dplyr::select(-env), rr$env)
+      readr::write_csv(rr %>% dplyr::select(-variant), file = paste0(prefix, "-joblist.csv"), append = append)
     } else {
       jsonlite::fromJSON(ret)
-      }
-  }
-  )
-
+    }
+  })
 }
 
 
@@ -104,14 +140,18 @@ gateaux_job_runner <- function(pars_list = NULL,
 #' @return Altered parameter list to run with gateaux_job_runner
 #' @export
 
-run_all_with <- function(pars_list, var, value, set="pars",rm_vals=F){
-
-  if(!rm_vals){
-    lapply(pars_list, function(l) {for(s in 1:length(var)) {l[[set]][var[s]] <- value[s]};l})
+run_all_with <- function(pars_list, var, value, set = "pars", rm_vals = FALSE) {
+  if (!rm_vals) {
+    lapply(pars_list, function(l) {
+      for (s in seq_along(var)) {
+        l[[set]][var[s]] <- value[s]
+      }
+      l
+    })
   } else {
-    lapply(pars_list, function(l) {l[[set]]<- NULL;l})
+    lapply(pars_list, function(l) {
+      l[[set]] <- NULL
+      l
+    })
   }
-
 }
-
-

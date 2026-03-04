@@ -9,7 +9,7 @@ gateaux_job_runner(
   report_name,
   server = "gorbachev.io",
   JWT,
-  log_jobs = T,
+  log_jobs = TRUE,
   prefix = "jobs",
   append = TRUE,
   cpus = "",
@@ -46,11 +46,22 @@ JSON API return
 Call arbitrary gateaux jobs from R
 }
 \examples{
-pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-            Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+pars <- list(
+  Run1 = list(
+    pars = list(Env1 = "This_env", Env2 = "That_env"),
+    wants = list(Upstream_job = 1234),
+    requires = list(Upstream_job2 = 4321)
+  ),
+  Run2 = list(
+    pars = list(Env1 = "That_env", Env2 = "This_env"),
+    wants = list(Upstream_job = 2222),
+    requires = list(Upstream_job2 = 4321)
+  )
+)
 gateaux_job_runner(pars,
-                   report_name = "bakeR-testreport",
-                   JWT = JWT)
+  report_name = "bakeR-testreport",
+  JWT = JWT
+)
 }
 \author{
 Dragonfly bakery

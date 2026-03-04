@@ -19,9 +19,9 @@ gateaux_download_output(
 
 \item{JWT}{String: Authentication token.}
 
-\item{page_no}{The pages where job output are located. defaults to the first and second pages, which is index 0 and 1.}
+\item{page_no}{The pages where job output are located. Defaults to the first and second pages (index 0 and 1).}
 
-\item{server}{The gateaux server url to use. defaults to gateaux.io}
+\item{server}{The gateaux server url to use. Defaults to gateaux.io}
 }
 \value{
 JSON API return
@@ -30,9 +30,11 @@ JSON API return
 Download gateaux jobs outputs from R
 }
 \examples{
-gateaux_download_output(report_name = "bakeR-testreport",
-                        report_id = "101010",
-                        JWT = JWT)
+gateaux_download_output(
+  report_name = "bakeR-testreport",
+  report_id = "101010",
+  JWT = JWT
+)
 }
 \author{
 Dragonfly bakery

@@ -5,7 +5,7 @@
 \title{Modify par list to run all jobs listed with a certain env variable -
 useful to temporarily try or alter a parameter setup without modifying the original setup}
 \usage{
-run_all_with(pars_list, var, value, set = "pars", rm_vals = F)
+run_all_with(pars_list, var, value, set = "pars", rm_vals = FALSE)
 }
 \arguments{
 \item{pars_list}{A named list of named lists of environment variables and job requirements - one list per job.
