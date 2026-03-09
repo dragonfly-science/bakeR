@@ -5,6 +5,7 @@
 #' @param JWT String: Authentication token.
 #' @param server The gateaux server url to use. Defaults to gateaux.io
 #' @param page_no The pages where job output are located. Defaults to the first and second pages (index 0 and 1).
+#' @param output_dir The directory where the downlaoded files are stored. Defaults to `output`
 #' @author Dragonfly bakery
 #' @return JSON API return
 #' @examples
@@ -21,18 +22,23 @@ gateaux_download_output <- function(report_name,
                                     report_id,
                                     JWT,
                                     page_no = c(0:1),
-                                    server = "gateaux.io") {
+                                    server = "gateaux.io",
+                                    output_dir = "output") {
   download_url <- list()
   for (pn in seq_along(page_no)) {
     print(pn)
     call_get_url <- sprintf(
-      'curl -H "Authorization: Bearer %s" -H "Content-Type: application/json" https://%s/api/jobs/%s?page=%s',
+      'curl -H "Authorization: Bearer %s" -H "Content-Type: application/json" https://%s/%sjobs/%s?page=%s',
       JWT,
       server,
+      ifelse(server == "kahawai.io", "", "api/"),
       report_name,
       page_no[pn]
     )
-    json_get_url <- rjson::fromJSON(system(call_get_url, intern = TRUE))
+    print(call_get_url)
+    json <- system(call_get_url, intern = TRUE)
+    return(json)
+    json_get_url <- rjson::fromJSON(json)
 
     download_url[[pn]] <- data.frame(
       job_id = sapply(json_get_url$results, function(i) i[["id"]]),
@@ -44,9 +50,14 @@ gateaux_download_output <- function(report_name,
 
   print("Downloading ...")
   for (f in seq_len(download_url)) {
-    if (!dir.exists("output/")) dir.create("output/")
+    if (!dir.exists(output_dir)) dir.create(output_dir)
     message(sprintf("[%s] %s -- %s", f, report_name, download_url$job_id[f]))
-    call_download <- sprintf("curl '%s' > output/%s", download_url$f_url[f], paste0(f, "_", report_name, ".zip"))
+    call_download <- sprintf(
+      "curl '%s' > %s/%s",
+      download_url$f_url[f],
+      output_dir,
+      paste0(f, "_", report_name, ".zip")
+    )
     print(call_download)
     system(call_download)
     print(paste("Stored here: ", file.path(getwd(), paste0(f, "_", report_name, ".zip"))))
