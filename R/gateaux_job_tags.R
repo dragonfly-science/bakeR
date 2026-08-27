@@ -38,7 +38,7 @@
 gateaux_list_jobs <- function(report_name,
                               JWT,
                               server = 'kahawai.io',
-                              page = 1,
+                              page = 0,
                               filter = NULL,
                               tags = NULL) {
 
