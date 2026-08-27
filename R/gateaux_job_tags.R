@@ -15,7 +15,7 @@
 #'
 #' @param report_name The report code to list jobs for.
 #' @param JWT String: Authentication token.
-#' @param server The server url to use. Defaults to flexion.larva.kahawai.net.nz
+#' @param server The server url to use. Defaults to kahawai.io
 #' @param page Integer (or vector of integers): result page(s) to fetch. Results
 #' from multiple pages are combined. Defaults to 1.
 #' @param filter Optional string: limit jobs to those whose details contain this word.
@@ -37,7 +37,7 @@
 
 gateaux_list_jobs <- function(report_name,
                               JWT,
-                              server = 'flexion.larva.kahawai.net.nz',
+                              server = 'kahawai.io',
                               page = 1,
                               filter = NULL,
                               tags = NULL) {
@@ -90,7 +90,7 @@ gateaux_list_jobs <- function(report_name,
 #' @param report_name The report code the job belongs to.
 #' @param job_id The job ID to annotate.
 #' @param JWT String: Authentication token.
-#' @param server The server url to use. Defaults to flexion.larva.kahawai.net.nz
+#' @param server The server url to use. Defaults to kahawai.io
 #' @param tags Optional named list/vector of searchable key-value pairs,
 #' e.g. \code{list(state = "unreviewed", series = "XYZ123")}. Pass \code{list()}
 #' to clear existing tags.
@@ -112,7 +112,7 @@ gateaux_list_jobs <- function(report_name,
 gateaux_annotate_job <- function(report_name,
                                  job_id,
                                  JWT,
-                                 server = 'flexion.larva.kahawai.net.nz',
+                                 server = 'kahawai.io',
                                  tags = NULL,
                                  metadata = NULL) {
 
