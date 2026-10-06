@@ -64,7 +64,7 @@ gateaux_list_jobs <- function(report_name,
                       JWT, call_url)
     }
 
-    raw <- paste(system(call, intern = TRUE), collapse = "\n")
+    raw <- paste(.system(call, intern = TRUE), collapse = "\n")
     # give a useful error when the server returns a non-JSON body (e.g. a 404
     # "File not found" page) rather than the opaque jsonlite lexer error
     if (!grepl('^\\s*[\\[{]', raw))
@@ -130,6 +130,6 @@ gateaux_annotate_job <- function(report_name,
   call <- sprintf('curl -s -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'%s\' "%s"',
                   JWT, body_json, call_url)
 
-  ret <- system(call, intern = TRUE)
+  ret <- .system(call, intern = TRUE)
   invisible(jsonlite::fromJSON(ret))
 }

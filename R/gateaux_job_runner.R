@@ -72,9 +72,9 @@ gateaux_job_runner <- function(pars_list = NULL,
                     call_url
                     )
 
-      print(call)
+      print(.redact(call))
 
-    ret <- system(call,intern=T)
+    ret <- .system(call, intern = TRUE)
     if(log_jobs){
 
       rr <- jsonlite::fromJSON(ret)

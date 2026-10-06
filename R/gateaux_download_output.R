@@ -27,7 +27,7 @@ gateaux_download_output <- function(report_name,
   for(pn in 1:length(page_no)) {
     print(pn)
     call_getURL <- sprintf('curl -H "Authorization: Bearer %s" -H "Content-Type: application/json" https://%s/api/jobs/%s?page=%s', JWT, server, report_name, page_no[pn])
-    json_getURL <- rjson::fromJSON(system(call_getURL, intern = T))
+    json_getURL <- rjson::fromJSON(.system(call_getURL, intern = TRUE))
 
     downloadURL[[pn]] <- data.frame(jobID = sapply(json_getURL$results, function(i)i[["id"]]),
                                     fURL = sapply(json_getURL$results, function(i)i[["files_url"]]))
@@ -41,8 +41,8 @@ gateaux_download_output <- function(report_name,
     message(sprintf('[%s] %s -- %s', f, report_name, downloadURL$jobID[f]))
     # call_download <- sprintf("curl -o output/%s '%s'", paste0(f,'_',report_name, '.zip'), downloadURL$fURL[f])
     call_download <- sprintf("curl '%s' > output/%s", downloadURL$fURL[f], paste0(f,'_',report_name, '.zip'))
-    print(call_download)
-    system(call_download)
+    print(.redact(call_download))
+    .system(call_download, intern = FALSE)
     print(paste('Stored here: ', file.path(getwd(), paste0(f,'_',report_name, '.zip'))))
   }
 }
