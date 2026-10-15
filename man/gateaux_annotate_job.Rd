@@ -8,7 +8,7 @@ gateaux_annotate_job(
   report_name,
   job_id,
   JWT,
-  server = "flexion.larva.kahawai.net.nz",
+  server = "gateaux.io",
   tags = NULL,
   metadata = NULL
 )
@@ -18,9 +18,10 @@ gateaux_annotate_job(
 
 \item{job_id}{The job ID to annotate.}
 
-\item{JWT}{String: Authentication token.}
+\item{JWT}{String: your API key, from the API guide page of the web UI.}
 
-\item{server}{The server url to use. Defaults to flexion.larva.kahawai.net.nz}
+\item{server}{The gateaux server to use. Defaults to gateaux.io; use
+\code{"kahawai.io"} for Kahawai.}
 
 \item{tags}{Optional named list/vector of searchable key-value pairs,
 e.g. \code{list(state = "unreviewed", series = "XYZ123")}. Pass \code{list()}

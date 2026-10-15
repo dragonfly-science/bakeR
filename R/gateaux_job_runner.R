@@ -1,32 +1,47 @@
-#' Call arbitrary gateaux jobs from R
+#' Launch gateaux jobs from R
 #'
-#' @param pars_list A named list of named lists of environment variables and job requirements - one list per job.
-#' Each named list defines a job tag (name), with up to three sub-lists:
-#'     *  pars (named environment variables passed to the job),
-#'     *  wants (named optional job dependencies),
-#'     *  requires (named required job dependencies).
-#' @param report_name The name of the job
-#' @param JWT String: Authentication token.
-#' @param Server The gateaux server url to use. defaults to gorbachev.io
-#' @param log_jobs Export job parameters to logfile?
-#' @param prefix for the list, can include path
-#' @param append append to existing file?
-#' @param cpus cpus for apparatchik, will override any gorbachev.yaml settings
-#' @param memory memory for apparatchik, will override any gorbachev.yaml settings#'
+#' Submits one job per element of \code{pars_list} to a report, each with its
+#' own environment variables and (optionally) job dependencies. The element's
+#' name is attached to the job as the \code{TAG} environment variable.
+#'
+#' @param pars_list A named list of named lists, one per job. Each inner list
+#' may have up to three elements:
+#'     *  \code{pars}: named environment variables passed to the job,
+#'     *  \code{wants}: named optional job dependencies (job ids),
+#'     *  \code{requires}: named required job dependencies (job ids).
+#' @param report_name The report code (as shown in the Gateaux web UI).
+#' @param JWT String: your API key, from the API guide page of the web UI.
+#' @param server The gateaux server to use. Defaults to gateaux.io; use
+#' \code{"kahawai.io"} for Kahawai.
+#' @param log_jobs If TRUE (the default), append the details of each submitted
+#' job to a CSV file (see \code{prefix}) as well as returning them.
+#' @param prefix Prefix of the CSV file written when \code{log_jobs} is TRUE;
+#' may include a path. The file is \code{<prefix>-joblist.csv}.
+#' @param append Append to the CSV file if it exists (TRUE) or overwrite it.
+#' @param cpus CPUs for the job, overriding the report's gateaux.yaml.
+#' @param memory Memory for the job in gigabytes, overriding the report's gateaux.yaml.
 #' @author Dragonfly bakery
-#' @return JSON API return
+#' @return A list with one element per job: the job as returned by the API
+#' (a list), or, when \code{log_jobs} is TRUE, the flattened data frame that was
+#' written to the CSV file.
 #' @examples
-#' pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-#'             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+#' \dontrun{
+#' pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
+#'                          wants = list(Upstream_job = 1234),
+#'                          requires = list(Upstream_job2 = 4321)),
+#'              Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
+#'                          wants = list(Upstream_job = 2222),
+#'                          requires = list(Upstream_job2 = 4321)))
 #' gateaux_job_runner(pars,
 #'                    report_name = "bakeR-testreport",
 #'                    JWT = JWT)
+#' }
 #' @importFrom magrittr %>%
 #' @export
 
 gateaux_job_runner <- function(pars_list = NULL,
                                report_name,
-                               server = 'gorbachev.io',
+                               server = 'gateaux.io',
                                JWT,
                                log_jobs = T,
                                prefix = 'jobs',
@@ -34,7 +49,8 @@ gateaux_job_runner <- function(pars_list = NULL,
                                cpus = '',
                                memory = ''){
 
-    call_url <- paste0("https://",server,"/job/",report_name)
+    # the job routes live under /api/ (as the other functions already use)
+    call_url <- paste0("https://",server,"/api/job/",report_name)
     if(cpus != '') cpus <- sprintf('"cpus":%s, ',  cpus)
     if(memory != '') memory <- sprintf('"memory":%s, ', memory)
 
@@ -90,18 +106,24 @@ gateaux_job_runner <- function(pars_list = NULL,
 }
 
 
-#' Modify par list to run all jobs listed with a certain env variable -
-#' useful to temporarily try or alter a parameter setup without modifying the original setup
+#' Modify a parameter list to run all jobs with a certain setting
 #'
-#' @param pars_list A named list of named lists of environment variables and job requirements - one list per job.
-#' Each named list defines a job tag (name), with up to three sub-lists:
-#'     *  pars (named environment variables passed to the job),
-#'     *  wants (named optional job dependencies),
-#'     *  requires (named required job dependencies).
-#' @param var env variable to create or alter.
-#' @param value env variable value to assign. Can be a single value or a vector or the same length as pars_list.
+#' Useful to try or alter a setting across every job without editing the
+#' original list.
+#'
+#' @param pars_list A named list of named lists, one per job, as for
+#' \code{\link{gateaux_job_runner}}.
+#' @param var Name(s) of the environment variable (or dependency) to create or alter.
+#' @param value Value(s) to assign, one per element of \code{var}.
+#' @param set Which part of each job to change: \code{"pars"} (the default),
+#' \code{"wants"} or \code{"requires"}.
+#' @param rm_vals If TRUE, remove the whole \code{set} element from every job
+#' instead of setting values.
 #' @author Dragonfly bakery
-#' @return Altered parameter list to run with gateaux_job_runner
+#' @return The altered parameter list, ready for \code{\link{gateaux_job_runner}}.
+#' @examples
+#' pars <- list(Run1 = list(pars = list(Env1 = "a")), Run2 = list(pars = list(Env1 = "b")))
+#' run_all_with(pars, "DEBUG", "yes")
 #' @export
 
 run_all_with <- function(pars_list, var, value, set="pars",rm_vals=F){

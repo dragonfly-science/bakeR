@@ -1,12 +1,15 @@
 Package: bakeR
 Type: Package
-Title: calling gateaux API from R
+Title: Call the Gateaux API from R
 Version: 0.2.0
 Author: Philipp Neubauer
-Maintainer: Philipp Neubauer <philipp@dragonfly.comnz>
-Description: Ever wanted to just launch jobs on Gorbi from R? Now you can do that with minimal overhead! Supports env variables, wants and requires statements.
+Maintainer: Philipp Neubauer <philipp@dragonfly.co.nz>
+Description: Launch Gateaux jobs from R with environment variables, wants and requires; list and tag jobs; download their outputs.
 License: DF
 Imports: jsonlite, readr (>= 2.0.0), magrittr, dplyr, rjson
+Suggests: testthat (>= 3.0.0), withr, rlang
+Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3

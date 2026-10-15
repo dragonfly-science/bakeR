@@ -7,8 +7,8 @@
 gateaux_list_jobs(
   report_name,
   JWT,
-  server = "flexion.larva.kahawai.net.nz",
-  page = 1,
+  server = "gateaux.io",
+  page = 0,
   filter = NULL,
   tags = NULL
 )
@@ -16,12 +16,13 @@ gateaux_list_jobs(
 \arguments{
 \item{report_name}{The report code to list jobs for.}
 
-\item{JWT}{String: Authentication token.}
+\item{JWT}{String: your API key, from the API guide page of the web UI.}
 
-\item{server}{The server url to use. Defaults to flexion.larva.kahawai.net.nz}
+\item{server}{The gateaux server to use. Defaults to gateaux.io; use
+\code{"kahawai.io"} for Kahawai.}
 
-\item{page}{Integer (or vector of integers): result page(s) to fetch. Results
-from multiple pages are combined. Defaults to 1.}
+\item{page}{Integer (or vector of integers): result page(s) to fetch, zero-based.
+Results from multiple pages are combined. Defaults to 0, the most recent page.}
 
 \item{filter}{Optional string: limit jobs to those whose details contain this word.}
 

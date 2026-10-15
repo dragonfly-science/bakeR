@@ -2,28 +2,34 @@
 % Please edit documentation in R/gateaux_job_runner.R
 \name{run_all_with}
 \alias{run_all_with}
-\title{Modify par list to run all jobs listed with a certain env variable -
-useful to temporarily try or alter a parameter setup without modifying the original setup}
+\title{Modify a parameter list to run all jobs with a certain setting}
 \usage{
 run_all_with(pars_list, var, value, set = "pars", rm_vals = F)
 }
 \arguments{
-\item{pars_list}{A named list of named lists of environment variables and job requirements - one list per job.
-Each named list defines a job tag (name), with up to three sub-lists:
-    *  pars (named environment variables passed to the job),
-    *  wants (named optional job dependencies),
-    *  requires (named required job dependencies).}
+\item{pars_list}{A named list of named lists, one per job, as for
+\code{\link{gateaux_job_runner}}.}
 
-\item{var}{env variable to create or alter.}
+\item{var}{Name(s) of the environment variable (or dependency) to create or alter.}
 
-\item{value}{env variable value to assign. Can be a single value or a vector or the same length as pars_list.}
+\item{value}{Value(s) to assign, one per element of \code{var}.}
+
+\item{set}{Which part of each job to change: \code{"pars"} (the default),
+\code{"wants"} or \code{"requires"}.}
+
+\item{rm_vals}{If TRUE, remove the whole \code{set} element from every job
+instead of setting values.}
 }
 \value{
-Altered parameter list to run with gateaux_job_runner
+The altered parameter list, ready for \code{\link{gateaux_job_runner}}.
 }
 \description{
-Modify par list to run all jobs listed with a certain env variable -
-useful to temporarily try or alter a parameter setup without modifying the original setup
+Useful to try or alter a setting across every job without editing the
+original list.
+}
+\examples{
+pars <- list(Run1 = list(pars = list(Env1 = "a")), Run2 = list(pars = list(Env1 = "b")))
+run_all_with(pars, "DEBUG", "yes")
 }
 \author{
 Dragonfly bakery

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gateaux_download_output.R
 \name{gateaux_download_output}
 \alias{gateaux_download_output}
-\title{Download gateaux jobs outputs from R}
+\title{Download gateaux job outputs from R}
 \usage{
 gateaux_download_output(
   report_name,
@@ -13,26 +13,34 @@ gateaux_download_output(
 )
 }
 \arguments{
-\item{report_name}{The name of the job}
+\item{report_name}{The report code (as shown in the Gateaux web UI).}
 
-\item{report_id}{The job ID}
+\item{report_id}{The job id(s) whose outputs to download.}
 
-\item{JWT}{String: Authentication token.}
+\item{JWT}{String: your API key, from the API guide page of the web UI.}
 
-\item{page_no}{The pages where job output are located. defaults to the first and second pages, which is index 0 and 1.}
+\item{page_no}{The result page(s) of the report's job list to search for
+the jobs. Pages are zero-based; the default searches the first two.}
 
-\item{server}{The gateaux server url to use. defaults to gateaux.io}
+\item{server}{The gateaux server to use. Defaults to gateaux.io; use
+\code{"kahawai.io"} for Kahawai.}
 }
 \value{
-JSON API return
+Nothing useful; called for its side effect of writing
+\code{output/<n>_<report_name>.zip} for each job found.
 }
 \description{
-Download gateaux jobs outputs from R
+Downloads the output files of one or more jobs, each as a zip archive, into
+an \code{output/} directory under the working directory. The jobs are found
+by listing the report's jobs page by page, so a job older than the pages
+requested will not be found.
 }
 \examples{
+\dontrun{
 gateaux_download_output(report_name = "bakeR-testreport",
                         report_id = "101010",
                         JWT = JWT)
+}
 }
 \author{
 Dragonfly bakery

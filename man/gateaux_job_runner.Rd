@@ -2,12 +2,12 @@
 % Please edit documentation in R/gateaux_job_runner.R
 \name{gateaux_job_runner}
 \alias{gateaux_job_runner}
-\title{Call arbitrary gateaux jobs from R}
+\title{Launch gateaux jobs from R}
 \usage{
 gateaux_job_runner(
   pars_list = NULL,
   report_name,
-  server = "gorbachev.io",
+  server = "gateaux.io",
   JWT,
   log_jobs = T,
   prefix = "jobs",
@@ -17,40 +17,53 @@ gateaux_job_runner(
 )
 }
 \arguments{
-\item{pars_list}{A named list of named lists of environment variables and job requirements - one list per job.
-Each named list defines a job tag (name), with up to three sub-lists:
-    *  pars (named environment variables passed to the job),
-    *  wants (named optional job dependencies),
-    *  requires (named required job dependencies).}
+\item{pars_list}{A named list of named lists, one per job. Each inner list
+may have up to three elements:
+    *  \code{pars}: named environment variables passed to the job,
+    *  \code{wants}: named optional job dependencies (job ids),
+    *  \code{requires}: named required job dependencies (job ids).}
 
-\item{report_name}{The name of the job}
+\item{report_name}{The report code (as shown in the Gateaux web UI).}
 
-\item{JWT}{String: Authentication token.}
+\item{server}{The gateaux server to use. Defaults to gateaux.io; use
+\code{"kahawai.io"} for Kahawai.}
 
-\item{log_jobs}{Export job parameters to logfile?}
+\item{JWT}{String: your API key, from the API guide page of the web UI.}
 
-\item{prefix}{for the list, can include path}
+\item{log_jobs}{If TRUE (the default), append the details of each submitted
+job to a CSV file (see \code{prefix}) as well as returning them.}
 
-\item{append}{append to existing file?}
+\item{prefix}{Prefix of the CSV file written when \code{log_jobs} is TRUE;
+may include a path. The file is \code{<prefix>-joblist.csv}.}
 
-\item{cpus}{cpus for apparatchik, will override any gorbachev.yaml settings}
+\item{append}{Append to the CSV file if it exists (TRUE) or overwrite it.}
 
-\item{memory}{memory for apparatchik, will override any gorbachev.yaml settings#'}
+\item{cpus}{CPUs for the job, overriding the report's gateaux.yaml.}
 
-\item{Server}{The gateaux server url to use. defaults to gorbachev.io}
+\item{memory}{Memory for the job in gigabytes, overriding the report's gateaux.yaml.}
 }
 \value{
-JSON API return
+A list with one element per job: the job as returned by the API
+(a list), or, when \code{log_jobs} is TRUE, the flattened data frame that was
+written to the CSV file.
 }
 \description{
-Call arbitrary gateaux jobs from R
+Submits one job per element of \code{pars_list} to a report, each with its
+own environment variables and (optionally) job dependencies. The element's
+name is attached to the job as the \code{TAG} environment variable.
 }
 \examples{
-pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-            Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+\dontrun{
+pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
+                         wants = list(Upstream_job = 1234),
+                         requires = list(Upstream_job2 = 4321)),
+             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
+                         wants = list(Upstream_job = 2222),
+                         requires = list(Upstream_job2 = 4321)))
 gateaux_job_runner(pars,
                    report_name = "bakeR-testreport",
                    JWT = JWT)
+}
 }
 \author{
 Dragonfly bakery
