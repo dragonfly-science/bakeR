@@ -16,7 +16,7 @@ gateaux_request(
 )
 }
 \arguments{
-\item{method}{`"GET"`, `"POST"` or `"DELETE"`.}
+\item{method}{`"GET"`, `"POST"`, `"PUT"`, `"PATCH"` or `"DELETE"`.}
 
 \item{path}{Request path.}
 

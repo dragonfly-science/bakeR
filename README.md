@@ -64,6 +64,17 @@ gateaux_job_dag("bakeR-testreport", jobs$id[1], JWT)          # upstream/downstr
 gateaux_report_dag("bakeR-testreport", JWT)                   # declared pipeline
 ```
 
+## Reports and secrets
+
+```r
+gateaux_reports(JWT, filter = "psc")                                  # what you can see
+gateaux_create_report("my-report", "dragonfly-science/repo", "main", "reports/my", JWT)
+gateaux_update_report("my-report", JWT, description = "Nightly run")
+gateaux_set_secret("my-report", "API_TOKEN", token, JWT)             # names only ever come back
+gateaux_secrets("my-report", JWT)
+gateaux_delete_report("my-report", JWT)                               # archives it
+```
+
 ## Which API
 
 bakeR uses the Gateaux v2 API (`/api/v2`, documented at

@@ -32,7 +32,7 @@ gateaux_url <- function(server, path) {
 #' into R errors. v2 errors carry a JSON envelope `{"error": {code, message}}`
 #' which is reported as `gateaux <code>: <message>`.
 #'
-#' @param method `"GET"`, `"POST"` or `"DELETE"`.
+#' @param method `"GET"`, `"POST"`, `"PUT"`, `"PATCH"` or `"DELETE"`.
 #' @param path Request path.
 #' @param JWT Bearer token: a user API key from `/auth/key` or a report token.
 #' @param server See [gateaux_url()].
@@ -56,8 +56,8 @@ gateaux_request <- function(method, path, JWT, server = "gateaux.io", body = NUL
     args$body <- jsonlite::toJSON(body, auto_unbox = TRUE, null = "null")
     args <- c(args, list(httr::content_type_json()))
   }
-  fn <- switch(method, GET = httr::GET, POST = httr::POST, DELETE = httr::DELETE,
-               stop("Unsupported method: ", method))
+  fn <- switch(method, GET = httr::GET, POST = httr::POST, PUT = httr::PUT, PATCH = httr::PATCH,
+               DELETE = httr::DELETE, stop("Unsupported method: ", method))
   resp <- do.call(fn, args)
   gateaux_check(resp)
   if (!parse) return(resp)
