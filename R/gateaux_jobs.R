@@ -187,3 +187,28 @@ gateaux_stream_log <- function(report_name, job_id, JWT, server = "gateaux.io",
   gateaux_check(resp)
   invisible(seen)
 }
+
+#' Mint a service-account token for a report
+#'
+#' A service-account token acts as you, limited to one report and the given
+#' scopes, and is what to put in CI rather than your personal API key. It is
+#' returned once and not stored by the server; it expires after
+#' `expires_in_days` and stops working if you lose access to the report.
+#'
+#' @inheritParams gateaux_jobs
+#' @param name A label for the token (recorded in the token).
+#' @param scopes Character vector from `jobs:submit`, `jobs:read`,
+#'   `jobs:cancel`, `logs:read`, `outputs:read`. Default: all of them.
+#' @param expires_in_days Lifetime, 1 to 365 (default 30).
+#' @return The token string, with the server's record (name, scopes, expiry) in `attr(, "details")`.
+#' @export
+gateaux_mint_token <- function(report_name, JWT, server = "gateaux.io", name = NULL,
+                               scopes = NULL, expires_in_days = NULL) {
+  body <- list()
+  if (!is.null(name)) body$name <- name
+  if (!is.null(scopes)) body$scopes <- I(as.character(scopes))
+  if (!is.null(expires_in_days)) body$expires_in_days <- as.integer(expires_in_days)
+  if (length(body) == 0) body <- structure(list(), names = character())
+  res <- gateaux_request("POST", sprintf("/api/v2/reports/%s/tokens", report_name), JWT, server, body = body)
+  structure(res$token, details = res[setdiff(names(res), "token")])
+}

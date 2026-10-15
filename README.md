@@ -18,6 +18,15 @@ Every call takes a `JWT`. Log in to the Gateaux web UI and visit
 JWT <- "my_token_goes_here"
 ```
 
+For CI, mint a token that acts as you but is limited to one report and a
+set of scopes, and put that in the pipeline instead of your personal key:
+
+```r
+ci_token <- gateaux_mint_token("bakeR-testreport", JWT, name = "ci",
+                               scopes = c("jobs:submit", "jobs:read", "logs:read", "outputs:read"),
+                               expires_in_days = 90)
+```
+
 ## Submitting jobs
 
 Define one named list per job (the name becomes the job's tag), and launch:

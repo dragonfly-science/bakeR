@@ -55,3 +55,16 @@ test_that("a job can be submitted, waited for, logged and downloaded", {
   cancelled <- gateaux_cancel_job(l$GATEAUX_TEST_REPORT, submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
   expect_equal(cancelled$status, "Success")
 })
+
+test_that("a scoped service token is limited to its report and scopes", {
+  l <- live()
+  tok <- gateaux_mint_token(l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER,
+                            name = "bakeR-test", scopes = c("jobs:read", "logs:read"), expires_in_days = 1)
+  expect_type(tok, "character")
+  expect_equal(sort(unlist(attr(tok, "details")$scopes)), c("jobs:read", "logs:read"))
+  jobs <- gateaux_jobs(l$GATEAUX_TEST_REPORT, tok, l$GATEAUX_TEST_SERVER, perpage = 1)
+  expect_s3_class(jobs, "data.frame")
+  expect_error(gateaux_jobs("some-other-report", tok, l$GATEAUX_TEST_SERVER), "FORBIDDEN")
+  expect_error(gateaux_job_runner(list(t = list()), l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_SERVER, tok, log_jobs = FALSE), "INSUFFICIENT_SCOPE")
+  expect_error(gateaux_mint_token(l$GATEAUX_TEST_REPORT, tok, l$GATEAUX_TEST_SERVER), "FORBIDDEN")
+})
