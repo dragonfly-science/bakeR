@@ -152,7 +152,7 @@ reads the answers. The live tests in `tests/testthat/test-live.R` run against
 a real server when `GATEAUX_TEST_SERVER`, `GATEAUX_TEST_JWT` and
 `GATEAUX_TEST_REPORT` are set, and submit jobs when `GATEAUX_TEST_SUBMIT=1`
 as well. A pre-commit hook regenerates the documentation and runs the unit
-tests; enable it once per clone with
+tests (not the live ones); enable it once per clone with
 
 ```sh
 git config core.hooksPath hooks

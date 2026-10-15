@@ -16,5 +16,6 @@ if [ "$before" != "$(fingerprint)" ]; then
     exit 1
 fi
 
-echo "pre-commit: running the tests"
-Rscript -e 'devtools::test(stop_on_failure = TRUE, reporter = "summary")'
+echo "pre-commit: running the offline tests"
+# everything except the live suite, which needs a server and GATEAUX_TEST_*
+Rscript -e 'devtools::test(filter = "live", invert = TRUE, stop_on_failure = TRUE, reporter = "summary")'
