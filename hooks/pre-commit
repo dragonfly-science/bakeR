@@ -1,0 +1,20 @@
+#!/bin/sh
+# bakeR pre-commit hook: the documentation must be up to date and the
+# offline tests must pass. Enable once per clone with
+#     git config core.hooksPath hooks
+# Skip for one commit with `git commit --no-verify`.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+fingerprint() { cat NAMESPACE man/*.Rd | md5sum; }
+
+echo "pre-commit: regenerating documentation"
+before=$(fingerprint)
+Rscript -e 'suppressMessages(devtools::document(quiet = TRUE))'
+if [ "$before" != "$(fingerprint)" ]; then
+    echo "pre-commit: man/ or NAMESPACE were out of date and have been regenerated; stage them and commit again" >&2
+    exit 1
+fi
+
+echo "pre-commit: running the tests"
+Rscript -e 'devtools::test(stop_on_failure = TRUE, reporter = "summary")'

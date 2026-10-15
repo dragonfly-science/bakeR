@@ -78,7 +78,7 @@ gateaux_download_output <- function(report_name,
     message(sprintf('[%s] %s -- %s', f, report_name, downloadURL$jobID[f]))
     # files_url carries its own report token as ?jwt=; a user API key in the
     # Authorization header would be rejected by the output server, so send none.
-    resp <- httr::GET(downloadURL$fURL[f])
+    resp <- tryCatch(httr::GET(downloadURL$fURL[f]), error = function(e) stop(.redact(conditionMessage(e)), call. = FALSE))
     gateaux_check(resp)
     writeBin(httr::content(resp, as = "raw"), path)
     message('Stored here: ', normalizePath(path))

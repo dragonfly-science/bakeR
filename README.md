@@ -11,12 +11,16 @@ remotes::install_github("dragonfly-science/bakeR")
 
 ## Authentication
 
-Every call takes a `JWT`. Log in to the Gateaux web UI and visit
-`https://gateaux.io/auth/key` to get a user API key (valid 30 days), then
+Every call takes your API key as `JWT`. Get it from the **API guide** page of
+the Gateaux web UI (the user menu, top right); it is valid for 30 days. Keep it
+out of version control, for example in a `.Renviron` file:
 
 ```r
-JWT <- "my_token_goes_here"
+JWT <- Sys.getenv("GATEAUX_KEY")
 ```
+
+Every function also takes a `server` argument, which defaults to `gateaux.io`.
+Pass `server = "kahawai.io"` to talk to Kahawai.
 
 For CI, mint a token that acts as you but is limited to one report and a
 set of scopes, and put that in the pipeline instead of your personal key:
@@ -72,12 +76,14 @@ gateaux_stream_log(jobs$id[1], JWT)                           # prints lines liv
 gateaux_job_outputs(jobs$id[1], JWT)                          # names, sizes, checksums
 gateaux_download_output("bakeR-testreport", jobs$id, JWT)     # into output/<report>-<id>/
 gateaux_cancel_job(jobs$id[1], JWT)
-gateaux_annotate_job(jobs$id[1], JWT, tags = list(reviewed = "yes"))  # tags and free-form metadata
+gateaux_annotate_job("bakeR-testreport", jobs$id[1], JWT, tags = list(reviewed = "yes"))  # tags and metadata
+gateaux_list_jobs("bakeR-testreport", JWT, tags = list(reviewed = "yes"))   # find them again
 gateaux_job_dag(jobs$id[1], JWT)                              # upstream/downstream jobs
 gateaux_report_dag("bakeR-testreport", JWT)                   # declared pipeline
 ```
 
-Job ids are global, so the single-job helpers take just the id.
+Job ids are global, so the single-job helpers take just the id;
+`gateaux_annotate_job()` keeps the report as its first argument, as in bakeR 0.2.
 
 ## Reports and secrets
 
@@ -104,6 +110,19 @@ gateaux_stream_events(JWT, until = function(job) job$status == "Failed")   # fol
 gateaux_stream_job(jobs$id[1], JWT)                           # follow one job to the end
 ```
 
+## Upgrading from bakeR 0.2
+
+Everything in 0.2 still works with the same arguments: `gateaux_job_runner()`,
+`gateaux_download_output()`, `gateaux_list_jobs()` (with `page`, `filter` and
+`tags`), `gateaux_annotate_job()` and `run_all_with()`. Two things differ:
+
+- Job data frames have the v2 shape described under [gateaux_jobs_frame()]:
+  `id`, `report`, `status`, `tag`, `triggered_by`, timings, then `env.<NAME>`
+  and `tags.<key>` columns. The legacy `files_url` column, which carried a
+  download token, is gone; use `gateaux_download_output()`.
+- `gateaux_job_runner()` returns a data frame of the submitted jobs rather than
+  the raw JSON.
+
 ## Which API
 
 bakeR uses the Gateaux v2 API (`/api/v2`, documented at
@@ -123,4 +142,18 @@ To talk to a local development server pass a full base URL as `server`:
 
 ```r
 gateaux_jobs("parent", JWT, server = "http://127.0.0.1:7444")
+```
+
+## Development
+
+The unit tests run offline (`devtools::test()`): the request function is
+replaced with a stand-in, so they check what the package sends and how it
+reads the answers. The live tests in `tests/testthat/test-live.R` run against
+a real server when `GATEAUX_TEST_SERVER`, `GATEAUX_TEST_JWT` and
+`GATEAUX_TEST_REPORT` are set, and submit jobs when `GATEAUX_TEST_SUBMIT=1`
+as well. A pre-commit hook regenerates the documentation and runs the unit
+tests; enable it once per clone with
+
+```sh
+git config core.hooksPath hooks
 ```

@@ -5,6 +5,7 @@
 \title{Set tags or metadata on a job}
 \usage{
 gateaux_annotate_job(
+  report_name,
   job_id,
   JWT,
   server = "gateaux.io",
@@ -13,20 +14,24 @@ gateaux_annotate_job(
 )
 }
 \arguments{
+\item{report_name}{The report the job belongs to. Job ids are global, so
+the v2 API does not need it, but the job is checked to belong to it.}
+
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}
 
 \item{server}{The gateaux server; see [gateaux_job_runner()].}
 
-\item{tags}{Named list or character vector of tags.}
+\item{tags}{Named list or character vector of tags; `list()` clears them.}
 
-\item{metadata}{A list, encoded as JSON.}
+\item{metadata}{A list (or a JSON string), encoded as JSON; `list()` clears it.}
 }
 \value{
-The updated job as a list.
+The updated job as a list, invisibly.
 }
 \description{
 `tags` replaces the job's tag map (a flat named list of strings);
-`metadata` is any JSON-encodable list. Give one or both.
+`metadata` is any JSON-encodable list. Give one or both; an empty list
+clears the field.
 }

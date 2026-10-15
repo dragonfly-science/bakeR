@@ -1,9 +1,9 @@
 Package: bakeR
 Type: Package
-Title: calling gateaux API from R
+Title: Call the Gateaux API from R
 Version: 0.3.0
 Author: Philipp Neubauer
-Maintainer: Philipp Neubauer <philipp@dragonfly.comnz>
+Maintainer: Philipp Neubauer <philipp@dragonfly.co.nz>
 Description: Launch, list, wait for and cancel Gateaux jobs from R, and fetch their logs and outputs. Talks to the v2 API by default; the legacy API can be selected with api = "v1".
 License: DF
 Imports: httr, jsonlite, readr (>= 2.0.0), magrittr, dplyr, tools

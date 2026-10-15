@@ -20,7 +20,8 @@ gateaux_request(
 
 \item{path}{Request path.}
 
-\item{JWT}{Bearer token: a user API key from `/auth/key` or a report token.}
+\item{JWT}{Bearer token: your user API key (from the API guide page of the
+web UI), a service token or a report token.}
 
 \item{server}{See [gateaux_url()].}
 

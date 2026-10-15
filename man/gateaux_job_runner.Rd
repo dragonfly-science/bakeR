@@ -30,7 +30,7 @@ Each named list defines a job tag (name), with up to three sub-lists:
 \item{server}{The gateaux server to use: a host name (defaults to gateaux.io)
 or a full base URL such as `http://127.0.0.1:7444`.}
 
-\item{JWT}{String: Authentication token (a user API key from `/auth/key`).}
+\item{JWT}{String: your API key, from the API guide page of the web UI.}
 
 \item{log_jobs}{Export job parameters to logfile?}
 
@@ -54,12 +54,16 @@ A data frame with one row per submitted job (see [gateaux_jobs_frame()]),
 Submits one job per entry of `pars_list`. By default this uses the v2 API
 (`POST /api/v2/reports/<report>/jobs`), which returns the created job(s)
 directly. With `api = "v1"` (or `options(bakeR.api = "v1")`) it uses the
-legacy `POST /job/<report>` route exactly as earlier versions of bakeR did.
+legacy `POST /api/job/<report>` route exactly as earlier versions of bakeR did.
 }
 \examples{
 \dontrun{
-pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-            Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
+                         wants = list(Upstream_job = 1234),
+                         requires = list(Upstream_job2 = 4321)),
+             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
+                         wants = list(Upstream_job = 2222),
+                         requires = list(Upstream_job2 = 4321)))
 gateaux_job_runner(pars,
                    report_name = "bakeR-testreport",
                    JWT = JWT)

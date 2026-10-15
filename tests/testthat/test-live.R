@@ -65,7 +65,7 @@ test_that("a job can be submitted, waited for, logged and downloaded", {
   expect_true(all(file.exists(files$path)))
   cancelled <- gateaux_cancel_job(submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
   expect_equal(cancelled$status, "Success")
-  annotated <- gateaux_annotate_job(submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER,
+  annotated <- gateaux_annotate_job(l$GATEAUX_TEST_REPORT, submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER,
                                     tags = list(tag = tag, reviewed = "yes"), metadata = list(note = "bakeR"))
   expect_equal(annotated$tags$reviewed, "yes")
   expect_equal(annotated$metadata$note, "bakeR")
@@ -174,10 +174,14 @@ test_that("thumbnails, zipped outputs and event streams work", {
 
   tag <- paste0("bakeR-stream-", format(Sys.time(), "%H%M%S"))
   submitted <- gateaux_job_runner(setNames(list(list()), tag), l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_SERVER, l$GATEAUX_TEST_JWT, log_jobs = FALSE)
+  # a quick job can finish before the stream is connected, so the stream may
+  # or may not carry its events; the job's final state is what must hold
   seen <- gateaux_stream_events(l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER, callback = function(job) NULL,
                                 until = function(job) job$id == submitted$id && job$status %in% c("Success", "Failed", "Invalid", "Cancelled"),
-                                timeout = 180)
-  expect_true(any(vapply(seen, function(j) j$id == submitted$id && j$status == "Success", logical(1))))
+                                timeout = 30)
+  expect_true(is.list(seen))
+  expect_true(all(vapply(seen, function(j) is.numeric(j$id) && is.character(j$status), logical(1))))
+  expect_equal(gateaux_wait_for_jobs(submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER, quiet = TRUE)$status, "Success")
   final <- gateaux_stream_job(submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER, callback = function(job) NULL, timeout = 60)
   expect_equal(final[[length(final)]]$status, "Success")
   zip <- gateaux_download_outputs_zip(submitted$id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER, dest = file.path(dir, "out.zip"))

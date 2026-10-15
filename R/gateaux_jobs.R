@@ -304,17 +304,46 @@ gateaux_session <- function(JWT, server = "gateaux.io") {
 #' Set tags or metadata on a job
 #'
 #' `tags` replaces the job's tag map (a flat named list of strings);
-#' `metadata` is any JSON-encodable list. Give one or both.
+#' `metadata` is any JSON-encodable list. Give one or both; an empty list
+#' clears the field.
 #'
 #' @inheritParams gateaux_job
-#' @param tags Named list or character vector of tags.
-#' @param metadata A list, encoded as JSON.
-#' @return The updated job as a list.
+#' @param report_name The report the job belongs to. Job ids are global, so
+#'   the v2 API does not need it, but the job is checked to belong to it.
+#' @param tags Named list or character vector of tags; `list()` clears them.
+#' @param metadata A list (or a JSON string), encoded as JSON; `list()` clears it.
+#' @return The updated job as a list, invisibly.
 #' @export
-gateaux_annotate_job <- function(job_id, JWT, server = "gateaux.io", tags = NULL, metadata = NULL) {
+gateaux_annotate_job <- function(report_name, job_id, JWT, server = "gateaux.io", tags = NULL, metadata = NULL) {
+  if (is.null(tags) && is.null(metadata)) stop("Provide at least one of 'tags' or 'metadata' to annotate a job.")
+  job <- gateaux_job(job_id, JWT, server)
+  if (!is.null(job$report) && !identical(job$report, report_name)) {
+    stop(sprintf("Job %s belongs to report %s, not %s", job_id, job$report, report_name))
+  }
   body <- list()
-  if (!is.null(tags)) body$tags <- as.list(tags)
-  if (!is.null(metadata)) body$metadata <- metadata
-  if (length(body) == 0) stop("Give tags and/or metadata")
-  gateaux_request("PATCH", sprintf("/api/v2/jobs/%s", job_id), JWT, server, body = body)
+  if (!is.null(tags)) body$tags <- .as_json_object(tags)
+  if (!is.null(metadata)) {
+    body$metadata <- if (is.character(metadata)) jsonlite::fromJSON(metadata, simplifyVector = FALSE) else .as_json_object(metadata)
+  }
+  invisible(gateaux_request("PATCH", sprintf("/api/v2/jobs/%s", job_id), JWT, server, body = body))
+}
+
+#' List a report's jobs, page by page
+#'
+#' The same listing as [gateaux_jobs()] with the arguments of bakeR 0.2:
+#' pages are zero-based and several can be fetched at once, `filter` is a
+#' free-text search, and `tags` matches attached job tags.
+#'
+#' @inheritParams gateaux_jobs
+#' @param page Integer (or vector of integers): result page(s) to fetch, zero-based.
+#'   Results from several pages are combined.
+#' @param filter Optional string: limit jobs to those whose details contain this word.
+#' @param tags Optional named list of tag key-value pairs to match, e.g. `list(author = "bob")`.
+#' @return A data frame with one row per job, most recent first; see [gateaux_jobs_frame()].
+#' @export
+gateaux_list_jobs <- function(report_name, JWT, server = "gateaux.io", page = 0, filter = NULL, tags = NULL) {
+  pages <- lapply(page, function(pg) gateaux_jobs(report_name, JWT, server, tags = tags, filter = filter, page = pg))
+  pages <- pages[vapply(pages, nrow, integer(1)) > 0]
+  if (length(pages) == 0) return(gateaux_jobs_frame(list()))
+  dplyr::bind_rows(pages)
 }

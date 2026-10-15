@@ -3,7 +3,7 @@
 #' Submits one job per entry of `pars_list`. By default this uses the v2 API
 #' (`POST /api/v2/reports/<report>/jobs`), which returns the created job(s)
 #' directly. With `api = "v1"` (or `options(bakeR.api = "v1")`) it uses the
-#' legacy `POST /job/<report>` route exactly as earlier versions of bakeR did.
+#' legacy `POST /api/job/<report>` route exactly as earlier versions of bakeR did.
 #'
 #' @param pars_list A named list of named lists of environment variables and job requirements - one list per job.
 #' Each named list defines a job tag (name), with up to three sub-lists:
@@ -13,7 +13,7 @@
 #' @param report_name The name of the report to run
 #' @param server The gateaux server to use: a host name (defaults to gateaux.io)
 #'   or a full base URL such as `http://127.0.0.1:7444`.
-#' @param JWT String: Authentication token (a user API key from `/auth/key`).
+#' @param JWT String: your API key, from the API guide page of the web UI.
 #' @param log_jobs Export job parameters to logfile?
 #' @param prefix for the list, can include path
 #' @param append append to existing file?
@@ -26,8 +26,12 @@
 #'   returned invisibly. With `api = "v1"` the legacy route returns the jobs too.
 #' @examples
 #' \dontrun{
-#' pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
-#'             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
+#' pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
+#'                          wants = list(Upstream_job = 1234),
+#'                          requires = list(Upstream_job2 = 4321)),
+#'              Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
+#'                          wants = list(Upstream_job = 2222),
+#'                          requires = list(Upstream_job2 = 4321)))
 #' gateaux_job_runner(pars,
 #'                    report_name = "bakeR-testreport",
 #'                    JWT = JWT)
@@ -57,7 +61,7 @@ gateaux_job_runner <- function(pars_list = NULL,
       res <- gateaux_request("POST", sprintf("/api/v2/reports/%s/jobs", report_name), JWT, server, body = body)
       res$results
     } else {
-      gateaux_request("POST", sprintf("/job/%s", report_name), JWT, server, body = body)
+      gateaux_request("POST", sprintf("/api/job/%s", report_name), JWT, server, body = body)
     }
     gateaux_jobs_frame(jobs)
   })

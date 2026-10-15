@@ -13,6 +13,7 @@ gateaux_jobs_frame(jobs)
 A data frame (tibble).
 }
 \description{
-One row per job, with the job's top-level fields, its `tag`, and one column
-per environment variable. Works for both API versions.
+One row per job, with the job's top-level fields, its `tag`, one column per
+environment variable (`env.<NAME>`) and one per job tag (`tags.<key>`).
+Works for both API versions.
 }
