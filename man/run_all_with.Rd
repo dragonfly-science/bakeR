@@ -17,6 +17,10 @@ Each named list defines a job tag (name), with up to three sub-lists:
 \item{var}{env variable to create or alter.}
 
 \item{value}{env variable value to assign. Can be a single value or a vector or the same length as pars_list.}
+
+\item{set}{Which sub-list to modify (default `"pars"`).}
+
+\item{rm_vals}{If `TRUE`, remove the sub-list named by `set` instead.}
 }
 \value{
 Altered parameter list to run with gateaux_job_runner

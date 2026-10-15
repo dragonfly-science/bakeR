@@ -7,13 +7,15 @@
 gateaux_job_runner(
   pars_list = NULL,
   report_name,
-  server = "gorbachev.io",
+  server = "gateaux.io",
   JWT,
   log_jobs = T,
   prefix = "jobs",
   append = TRUE,
   cpus = "",
-  memory = ""
+  memory = "",
+  branch = NULL,
+  api = NULL
 )
 }
 \arguments{
@@ -23,9 +25,12 @@ Each named list defines a job tag (name), with up to three sub-lists:
     *  wants (named optional job dependencies),
     *  requires (named required job dependencies).}
 
-\item{report_name}{The name of the job}
+\item{report_name}{The name of the report to run}
 
-\item{JWT}{String: Authentication token.}
+\item{server}{The gateaux server to use: a host name (defaults to gateaux.io)
+or a full base URL such as `http://127.0.0.1:7444`.}
+
+\item{JWT}{String: Authentication token (a user API key from `/auth/key`).}
 
 \item{log_jobs}{Export job parameters to logfile?}
 
@@ -33,24 +38,32 @@ Each named list defines a job tag (name), with up to three sub-lists:
 
 \item{append}{append to existing file?}
 
-\item{cpus}{cpus for apparatchik, will override any gorbachev.yaml settings}
+\item{cpus}{cpus for runner, will override any gateaux.yaml settings}
 
-\item{memory}{memory for apparatchik, will override any gorbachev.yaml settings#'}
+\item{memory}{memory for runner, will override any gateaux.yaml settings}
 
-\item{Server}{The gateaux server url to use. defaults to gorbachev.io}
+\item{branch}{Branch to run instead of the report's default (v2 only).}
+
+\item{api}{`"v2"` (default) or `"v1"` for the legacy API; see [gateaux_api()].}
 }
 \value{
-JSON API return
+A data frame with one row per submitted job (see [gateaux_jobs_frame()]),
+  returned invisibly. With `api = "v1"` the legacy route returns the jobs too.
 }
 \description{
-Call arbitrary gateaux jobs from R
+Submits one job per entry of `pars_list`. By default this uses the v2 API
+(`POST /api/v2/reports/<report>/jobs`), which returns the created job(s)
+directly. With `api = "v1"` (or `options(bakeR.api = "v1")`) it uses the
+legacy `POST /job/<report>` route exactly as earlier versions of bakeR did.
 }
 \examples{
+\dontrun{
 pars = list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"), wants = list(Upstream_job = 1234), requires = list(Upstream_job2 = 4321)),
             Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"), wants = list(Upstream_job = 2222), requires = list(Upstream_job2 = 4321)))
 gateaux_job_runner(pars,
                    report_name = "bakeR-testreport",
                    JWT = JWT)
+}
 }
 \author{
 Dragonfly bakery

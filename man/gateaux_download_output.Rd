@@ -2,37 +2,49 @@
 % Please edit documentation in R/gateaux_download_output.R
 \name{gateaux_download_output}
 \alias{gateaux_download_output}
-\title{Download gateaux jobs outputs from R}
+\title{Download gateaux job outputs from R}
 \usage{
 gateaux_download_output(
   report_name,
   report_id,
   JWT,
   page_no = c(0:1),
-  server = "gateaux.io"
+  server = "gateaux.io",
+  dest = "output",
+  api = NULL
 )
 }
 \arguments{
-\item{report_name}{The name of the job}
+\item{report_name}{The name of the report}
 
-\item{report_id}{The job ID}
+\item{report_id}{The job ID(s)}
 
 \item{JWT}{String: Authentication token.}
 
-\item{page_no}{The pages where job output are located. defaults to the first and second pages, which is index 0 and 1.}
+\item{page_no}{(v1 only) The job-list pages to search for the jobs. Defaults to pages 0 and 1.}
 
-\item{server}{The gateaux server url to use. defaults to gateaux.io}
+\item{server}{The gateaux server to use; see [gateaux_job_runner()].}
+
+\item{dest}{Directory to download into (default `output`).}
+
+\item{api}{`"v2"` (default) or `"v1"`; see [gateaux_api()].}
 }
 \value{
-JSON API return
+A data frame of the downloaded files (job id, name, local path), invisibly.
 }
 \description{
-Download gateaux jobs outputs from R
+With the v2 API (default) each output file of each job is downloaded into
+`<dest>/<report>-<job id>/`, keeping file names, and checked against the
+MD5 checksum the server reports. With `api = "v1"` the legacy behaviour is
+kept: the job list is paged through and each job's `files_url` is fetched
+as a ZIP into `<dest>/<n>_<report>.zip`.
 }
 \examples{
+\dontrun{
 gateaux_download_output(report_name = "bakeR-testreport",
                         report_id = "101010",
                         JWT = JWT)
+}
 }
 \author{
 Dragonfly bakery
