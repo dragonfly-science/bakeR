@@ -83,6 +83,35 @@ test_that("a scoped service token is limited to its report and scopes", {
   expect_error(gateaux_jobs("some-other-report", tok, l$GATEAUX_TEST_SERVER), "FORBIDDEN")
   expect_error(gateaux_job_runner(list(t = list()), l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_SERVER, tok, log_jobs = FALSE), "INSUFFICIENT_SCOPE")
   expect_error(gateaux_mint_token(l$GATEAUX_TEST_REPORT, tok, l$GATEAUX_TEST_SERVER), "FORBIDDEN")
+  expect_error(gateaux_tokens(l$GATEAUX_TEST_REPORT, tok, l$GATEAUX_TEST_SERVER), "FORBIDDEN")
+})
+
+test_that("service tokens can be listed, rotated and revoked", {
+  l <- live()
+  tok <- gateaux_mint_token(l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER,
+                            name = "bakeR-rotate", scopes = "jobs:read", expires_in_days = 1)
+  id <- attr(tok, "details")$id
+  expect_type(id, "character")
+  listed <- gateaux_tokens(l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
+  expect_s3_class(listed, "data.frame")
+  expect_equal(listed$status[listed$id == id], "active")
+  expect_equal(listed$scopes[listed$id == id], "jobs:read")
+
+  new <- gateaux_rotate_token(l$GATEAUX_TEST_REPORT, id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
+  expect_equal(attr(new, "details")$replaces, id)
+  expect_equal(unlist(attr(new, "details")$scopes), "jobs:read")
+  expect_error(gateaux_jobs(l$GATEAUX_TEST_REPORT, tok, l$GATEAUX_TEST_SERVER, perpage = 1), "TOKEN_REVOKED")
+  expect_s3_class(gateaux_jobs(l$GATEAUX_TEST_REPORT, new, l$GATEAUX_TEST_SERVER, perpage = 1), "data.frame")
+  expect_error(gateaux_rotate_token(l$GATEAUX_TEST_REPORT, id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER), "TOKEN_REVOKED")
+
+  new_id <- attr(new, "details")$id
+  revoked <- gateaux_revoke_token(l$GATEAUX_TEST_REPORT, new_id, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
+  expect_equal(revoked$status, "revoked")
+  expect_error(gateaux_jobs(l$GATEAUX_TEST_REPORT, new, l$GATEAUX_TEST_SERVER, perpage = 1), "TOKEN_REVOKED")
+  listed <- gateaux_tokens(l$GATEAUX_TEST_REPORT, l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER)
+  expect_equal(listed$replaced_by[listed$id == id], new_id)
+  expect_true(all(listed$status[listed$id %in% c(id, new_id)] == "revoked"))
+  expect_error(gateaux_revoke_token(l$GATEAUX_TEST_REPORT, "no-such-token", l$GATEAUX_TEST_JWT, l$GATEAUX_TEST_SERVER), "NOT_FOUND")
 })
 
 test_that("reports can be listed, created, changed, given secrets and archived", {

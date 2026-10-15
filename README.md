@@ -27,6 +27,17 @@ ci_token <- gateaux_mint_token("bakeR-testreport", JWT, name = "ci",
                                expires_in_days = 90)
 ```
 
+Tokens can be listed, rotated and revoked. Rotation mints a replacement
+with the same name and scopes and retires the old one, optionally after a
+grace period so a pipeline run in flight can finish:
+
+```r
+gateaux_tokens("bakeR-testreport", JWT)                       # id, name, status, scopes, ...
+new_token <- gateaux_rotate_token("bakeR-testreport", attr(ci_token, "details")$id, JWT,
+                                  grace_seconds = 600)
+gateaux_revoke_token("bakeR-testreport", attr(new_token, "details")$id, JWT)
+```
+
 ## Submitting jobs
 
 Define one named list per job (the name becomes the job's tag), and launch:

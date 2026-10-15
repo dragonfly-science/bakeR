@@ -221,6 +221,71 @@ gateaux_mint_token <- function(report_name, JWT, server = "gateaux.io", name = N
   structure(res$token, details = res[setdiff(names(res), "token")])
 }
 
+#' List a report's service-account tokens
+#'
+#' Every token minted for the report, newest first, including expired and
+#' revoked ones. The tokens themselves are never shown again; use the `id`
+#' with [gateaux_revoke_token()] and [gateaux_rotate_token()].
+#'
+#' @inheritParams gateaux_mint_token
+#' @return A data frame with one row per token: `id`, `name`, `status`
+#'   (`"active"`, `"expired"` or `"revoked"`), `scopes` (comma-separated),
+#'   `minted_by` (GitHub login), `created_at`, `expires_at`, `revoked_at`,
+#'   `revoked_by` and `replaced_by` (the id of the token a rotation minted in
+#'   its place).
+#' @export
+gateaux_tokens <- function(report_name, JWT, server = "gateaux.io") {
+  res <- gateaux_request("GET", sprintf("/api/v2/reports/%s/tokens", report_name), JWT, server)
+  dplyr::bind_rows(lapply(res, function(t) dplyr::tibble(
+    id = t$id, name = scalar_or_na(t$name), status = t$status,
+    scopes = paste(unlist(t$scopes), collapse = ","),
+    minted_by = scalar_or_na(t$minted_by$github_login),
+    created_at = t$created_at, expires_at = t$expires_at,
+    revoked_at = scalar_or_na(t$revoked_at),
+    revoked_by = scalar_or_na(t$revoked_by$github_login),
+    replaced_by = scalar_or_na(t$replaced_by))))
+}
+
+#' Revoke a service-account token
+#'
+#' The token stops working immediately. Revoking an already revoked token is
+#' harmless and returns its current state.
+#'
+#' @inheritParams gateaux_mint_token
+#' @param token_id The token's `id`, as returned by [gateaux_mint_token()]
+#'   (in `attr(, "details")$id`) or listed by [gateaux_tokens()].
+#' @return The token's record as a list (`id`, `name`, `status`, `scopes`,
+#'   `revoked_at`, `revoked_by`, ...), invisibly.
+#' @export
+gateaux_revoke_token <- function(report_name, token_id, JWT, server = "gateaux.io") {
+  invisible(gateaux_request("DELETE", sprintf("/api/v2/reports/%s/tokens/%s", report_name, token_id), JWT, server))
+}
+
+#' Rotate a service-account token
+#'
+#' Mints a replacement with the same name and scopes and revokes the old
+#' token, in one step. The old token keeps working for `grace_seconds` so a
+#' run in flight can finish while the new secret is being stored.
+#'
+#' @inheritParams gateaux_revoke_token
+#' @param expires_in_days Lifetime of the new token in days, from now. Default:
+#'   the old token's original lifetime.
+#' @param grace_seconds How long the old token keeps working after rotation
+#'   (default 0, maximum 3600).
+#' @return The new token as a character string, shown once, with its details
+#'   (`id`, `replaces`, `scopes`, `expires_at`, ...) in `attr(, "details")`,
+#'   exactly as [gateaux_mint_token()] returns.
+#' @export
+gateaux_rotate_token <- function(report_name, token_id, JWT, server = "gateaux.io",
+                                 expires_in_days = NULL, grace_seconds = NULL) {
+  body <- list()
+  if (!is.null(expires_in_days)) body$expires_in_days <- as.integer(expires_in_days)
+  if (!is.null(grace_seconds)) body$grace_seconds <- as.integer(grace_seconds)
+  if (length(body) == 0) body <- structure(list(), names = character())
+  res <- gateaux_request("POST", sprintf("/api/v2/reports/%s/tokens/%s/rotate", report_name, token_id), JWT, server, body = body)
+  structure(res$token, details = res[setdiff(names(res), "token")])
+}
+
 #' Who am I?
 #'
 #' Returns the user behind a token, what kind of token it is, and for a
