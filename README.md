@@ -53,16 +53,20 @@ job's `tag` annotation, so `gateaux_jobs(..., tag = "Run1")` finds it.
 ## Following jobs
 
 ```r
-gateaux_wait_for_jobs("bakeR-testreport", jobs$id, JWT)      # long-polls until finished
+gateaux_wait_for_jobs(jobs$id, JWT)                           # long-polls until finished
 gateaux_jobs("bakeR-testreport", JWT, status = "Running")    # server-side filters
-gateaux_job_log("bakeR-testreport", jobs$id[1], JWT)          # character vector of lines
-gateaux_stream_log("bakeR-testreport", jobs$id[1], JWT)       # prints lines live until the job stops
-gateaux_job_outputs("bakeR-testreport", jobs$id[1], JWT)      # names, sizes, checksums
+gateaux_jobs(NULL, JWT, status = c("Running", "Pending"))     # across every report you can see
+gateaux_job_log(jobs$id[1], JWT)                              # character vector of lines
+gateaux_stream_log(jobs$id[1], JWT)                           # prints lines live until the job stops
+gateaux_job_outputs(jobs$id[1], JWT)                          # names, sizes, checksums
 gateaux_download_output("bakeR-testreport", jobs$id, JWT)     # into output/<report>-<id>/
-gateaux_cancel_job("bakeR-testreport", jobs$id[1], JWT)
-gateaux_job_dag("bakeR-testreport", jobs$id[1], JWT)          # upstream/downstream jobs
+gateaux_cancel_job(jobs$id[1], JWT)
+gateaux_annotate_job(jobs$id[1], JWT, tags = list(reviewed = "yes"))  # tags and free-form metadata
+gateaux_job_dag(jobs$id[1], JWT)                              # upstream/downstream jobs
 gateaux_report_dag("bakeR-testreport", JWT)                   # declared pipeline
 ```
+
+Job ids are global, so the single-job helpers take just the id.
 
 ## Reports and secrets
 
@@ -73,6 +77,20 @@ gateaux_update_report("my-report", JWT, description = "Nightly run")
 gateaux_set_secret("my-report", "API_TOKEN", token, JWT)             # names only ever come back
 gateaux_secrets("my-report", JWT)
 gateaux_delete_report("my-report", JWT)                               # archives it
+```
+
+## Everything else the web UI can do
+
+```r
+gateaux_runners(JWT); gateaux_queues(JWT)                   # connected runners and their queues
+gateaux_runner_keys(JWT); gateaux_add_runner_key("ci", team_id, "key.pem", JWT)
+gateaux_repositories(JWT); gateaux_branches("dragonfly-science/repo", JWT); gateaux_tree("dragonfly-science/repo", JWT)
+gateaux_sync(JWT)                                             # re-sync from GitHub now
+gateaux_teams(JWT)                                            # teams, members in attr(, "members")
+gateaux_set_thumbnail("my-report", "cover.png", JWT); gateaux_delete_thumbnail("my-report", JWT)
+gateaux_download_outputs_zip(jobs$id[1], JWT)
+gateaux_stream_events(JWT, until = function(job) job$status == "Failed")   # follow every job change
+gateaux_stream_job(jobs$id[1], JWT)                           # follow one job to the end
 ```
 
 ## Which API

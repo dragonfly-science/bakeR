@@ -97,17 +97,17 @@ gateaux_jobs_frame <- function(jobs) {
     tag <- j$tags$tag %||% env$TAG
     base <- dplyr::tibble(
       id           = as.integer(j$id),
+      report       = scalar(j$report),
       status       = scalar(j$status),
       tag          = scalar(tag),
-      triggered_by = scalar(j$triggered_by),
+      triggered_by = scalar(if (is.list(j$triggered_by)) j$triggered_by$github_login else j$triggered_by),
       started_at   = scalar(j$started_at),
       finished_at  = scalar(j$finished_at),
       message      = scalar(j$message),
       runner       = scalar(j$runner %||% j$apparatchik),
       commit       = scalar(j$commit),
       cpus         = scalar(j$parameters$cpus),
-      memory       = scalar(j$parameters$memory),
-      files_url    = scalar(j$files_url)
+      memory       = scalar(j$parameters$memory)
     )
     if (length(env) > 0) {
       env <- lapply(env, scalar)

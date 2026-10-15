@@ -40,11 +40,13 @@ test_that("gateaux_url handles host names and base URLs", {
 })
 
 test_that("gateaux_jobs_frame flattens jobs and env", {
-  jobs <- list(list(id = 1, status = "Success", tags = list(tag = "a"), parameters = list(env = list(TAG = "a", X = "1"), cpus = 2)),
-               list(id = 2, status = "Pending", parameters = list(env = list(TAG = "b"))))
+  jobs <- list(list(id = 1, status = "Success", tags = list(tag = "a"), parameters = list(env = list(TAG = "a", X = "1"), cpus = 2),
+                    triggered_by = list(id = 11, github_login = "ed", name = "Ed")),
+               list(id = 2, status = "Pending", parameters = list(env = list(TAG = "b")), triggered_by = "legacy name"))
   f <- gateaux_jobs_frame(jobs)
   expect_equal(f$id, c(1L, 2L))
   expect_equal(f$tag, c("a", "b"))
+  expect_equal(f$triggered_by, c("ed", "legacy name"))
   expect_equal(f$env.X, c("1", NA))
   expect_equal(nrow(gateaux_jobs_frame(list())), 0)
 })

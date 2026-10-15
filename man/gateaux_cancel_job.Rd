@@ -4,11 +4,9 @@
 \alias{gateaux_cancel_job}
 \title{Cancel a job}
 \usage{
-gateaux_cancel_job(report_name, job_id, JWT, server = "gateaux.io")
+gateaux_cancel_job(job_id, JWT, server = "gateaux.io")
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}

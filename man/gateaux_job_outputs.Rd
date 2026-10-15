@@ -4,11 +4,9 @@
 \alias{gateaux_job_outputs}
 \title{List a job's output files}
 \usage{
-gateaux_job_outputs(report_name, job_id, JWT, server = "gateaux.io")
+gateaux_job_outputs(job_id, JWT, server = "gateaux.io")
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}

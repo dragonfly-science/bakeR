@@ -4,11 +4,9 @@
 \alias{gateaux_job_log}
 \title{Fetch a job's log}
 \usage{
-gateaux_job_log(report_name, job_id, JWT, server = "gateaux.io")
+gateaux_job_log(job_id, JWT, server = "gateaux.io")
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}

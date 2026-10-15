@@ -4,11 +4,9 @@
 \alias{gateaux_job}
 \title{Read one job}
 \usage{
-gateaux_job(report_name, job_id, JWT, server = "gateaux.io", wait = NULL)
+gateaux_job(job_id, JWT, server = "gateaux.io", wait = NULL)
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}
@@ -18,8 +16,8 @@ gateaux_job(report_name, job_id, JWT, server = "gateaux.io", wait = NULL)
 \item{wait}{Optional number of seconds to hold the request open waiting for the job to change (max 60).}
 }
 \value{
-The job as a list (the parsed API record).
+The job as a list (the parsed API record); its `report` field names the report.
 }
 \description{
-Read one job
+Job ids are global, so none of the single-job helpers need the report.
 }

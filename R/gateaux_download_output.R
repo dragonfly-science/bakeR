@@ -36,7 +36,7 @@ gateaux_download_output <- function(report_name,
 
   if (api == "v2") {
     rows <- lapply(report_id, function(jid) {
-      files <- gateaux_job_outputs(report_name, jid, JWT, server)
+      files <- gateaux_job_outputs(jid, JWT, server)
       if (nrow(files) == 0) {
         message(sprintf("%s job %s has no output files", report_name, jid))
         return(NULL)

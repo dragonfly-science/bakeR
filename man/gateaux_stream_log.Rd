@@ -5,7 +5,6 @@
 \title{Stream a job's log as it is written}
 \usage{
 gateaux_stream_log(
-  report_name,
   job_id,
   JWT,
   server = "gateaux.io",
@@ -13,8 +12,6 @@ gateaux_stream_log(
 )
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}

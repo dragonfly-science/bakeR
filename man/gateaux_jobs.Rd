@@ -2,10 +2,10 @@
 % Please edit documentation in R/gateaux_jobs.R
 \name{gateaux_jobs}
 \alias{gateaux_jobs}
-\title{List a report's jobs}
+\title{List jobs}
 \usage{
 gateaux_jobs(
-  report_name,
+  report_name = NULL,
   JWT,
   server = "gateaux.io",
   status = NULL,
@@ -18,7 +18,7 @@ gateaux_jobs(
 )
 }
 \arguments{
-\item{report_name}{The report.}
+\item{report_name}{The report, or `NULL` for all reports.}
 
 \item{JWT}{Authentication token.}
 
@@ -42,5 +42,7 @@ gateaux_jobs(
 A data frame; see [gateaux_jobs_frame()]. The total number of matching jobs is in `attr(, "total")`.
 }
 \description{
-List a report's jobs
+With a `report_name`, lists that report's jobs. With `report_name = NULL`,
+lists jobs across every report you can see, which is how to find, for
+example, everything currently running.
 }

@@ -5,7 +5,6 @@
 \title{Wait for jobs to finish}
 \usage{
 gateaux_wait_for_jobs(
-  report_name,
   job_ids,
   JWT,
   server = "gateaux.io",
@@ -15,8 +14,6 @@ gateaux_wait_for_jobs(
 )
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_ids}{Job ids, e.g. the `id` column from [gateaux_job_runner()].}
 
 \item{JWT}{Authentication token.}

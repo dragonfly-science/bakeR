@@ -6,7 +6,6 @@
 \title{Fetch the dependency graph around a job or a report}
 \usage{
 gateaux_job_dag(
-  report_name,
   job_id,
   JWT,
   server = "gateaux.io",
@@ -23,8 +22,6 @@ gateaux_report_dag(
 )
 }
 \arguments{
-\item{report_name}{The report.}
-
 \item{job_id}{The job id.}
 
 \item{JWT}{Authentication token.}
@@ -34,6 +31,8 @@ gateaux_report_dag(
 \item{direction}{`"both"` (default), `"up"` or `"down"`.}
 
 \item{depth}{`"full"` (default) or a positive integer.}
+
+\item{report_name}{The report (for `gateaux_report_dag()`).}
 }
 \value{
 A list with `nodes`, `edges` and `truncated`.
