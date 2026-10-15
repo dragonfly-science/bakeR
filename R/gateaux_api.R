@@ -103,6 +103,7 @@ gateaux_jobs_frame <- function(jobs) {
       started_at   = scalar(j$started_at),
       finished_at  = scalar(j$finished_at),
       message      = scalar(j$message),
+      runner       = scalar(j$runner %||% j$apparatchik),
       commit       = scalar(j$commit),
       cpus         = scalar(j$parameters$cpus),
       memory       = scalar(j$parameters$memory),
