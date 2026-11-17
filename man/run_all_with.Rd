@@ -15,7 +15,7 @@ run_all_with(pars_list, var, value, set = "pars", rm_vals = F)
 \item{value}{Value(s) to assign, one per element of \code{var}.}
 
 \item{set}{Which part of each job to change: \code{"pars"} (the default),
-\code{"wants"} or \code{"requires"}.}
+\code{"wants"}, \code{"requires"}, \code{"allows"} or \code{"triggers"}.}
 
 \item{rm_vals}{If TRUE, remove the whole \code{set} element from every job
 instead of setting values.}

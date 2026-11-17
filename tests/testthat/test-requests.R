@@ -66,10 +66,12 @@ test_that("gateaux_job_runner posts to /api/job/<report> on gateaux.io by defaul
   expect_equal(run$result[[1]]$id, 101)
 })
 
-test_that("gateaux_job_runner carries wants, requires, cpus, memory and the server", {
+test_that("gateaux_job_runner carries wants, requires, allows, triggers, cpus, memory and the server", {
   pars <- list(Run1 = list(pars = list(Env1 = "a"),
                            wants = list(Up = c(1, 2)),
-                           requires = list(Must = 3)),
+                           requires = list(Must = 3),
+                           allows = list(Down = 7, Other = c(8, 9)),
+                           triggers = list(Next = 11)),
                Run2 = list(pars = list()))
   run <- with_curl(function(cmd) canned_jobs(), function() {
     gateaux_job_runner(pars, report_name = "MyReport", JWT = "tok", server = "kahawai.io",
@@ -82,9 +84,13 @@ test_that("gateaux_job_runner carries wants, requires, cpus, memory and the serv
   expect_equal(b1$memory, 8)
   expect_equal(unlist(b1$wants), c("Up:1", "Up:2"))
   expect_equal(unlist(b1$requires), "Must:3")
+  expect_equal(unlist(b1$allows), c("Down:7", "Other:8", "Other:9"))
+  expect_equal(unlist(b1$triggers), "Next:11")
   b2 <- body_of(run$calls[2])
   expect_equal(b2$env, list(TAG = "Run2"))
   expect_null(b2$wants)
+  expect_null(b2$allows)
+  expect_null(b2$triggers)
 })
 
 test_that("gateaux_job_runner writes the job list CSV when asked", {
@@ -177,6 +183,10 @@ test_that("run_all_with sets, vectorises and removes", {
   expect_equal(two$Run1$pars$Y, "2")
   wants <- run_all_with(pars, "Up", 123, set = "wants")
   expect_equal(wants$Run1$wants[["Up"]], 123)
+  allows <- run_all_with(pars, "Down", 5, set = "allows")
+  expect_equal(allows$Run1$allows[["Down"]], 5)
+  triggers <- run_all_with(pars, "Next", 6, set = "triggers")
+  expect_equal(triggers$Run1$triggers[["Next"]], 6)
   gone <- run_all_with(pars, "Env1", NULL, rm_vals = TRUE)
   expect_null(gone$Run1$pars)
 })

@@ -38,14 +38,17 @@ By default the details of each submitted job are also appended to
 `jobs-joblist.csv` in the working directory (`log_jobs = FALSE` turns that
 off), and `cpus` and `memory` override the report's `gateaux.yaml`.
 
-`wants` and `requires` dependencies can be added like so, where the numbers
-are job ids:
+`wants`, `requires`, `allows` and `triggers` dependencies can be added like so,
+where the numbers are job ids. `allows` lists the jobs permitted to depend on the
+new job, and overrides the `allows` of the report's yaml for that job:
 
 ```r
 pars <- list(Run1 = list(pars = list(Env1 = "This_env",
                                      Env2 = "That_env"),
                          wants = list(Upstream_job = 1234),
-                         requires = list(Upstream_job2 = 4321)),
+                         requires = list(Upstream_job2 = 4321),
+                         allows = list(Downstream_report = 1234),
+                         triggers = list(Next_report = 5678)),
              Run2 = list(pars = list(Env1 = "That_env",
                                      Env2 = "This_env"),
                          wants = list(Upstream_job = c(2222, 5555, 6666)),

@@ -18,10 +18,14 @@ gateaux_job_runner(
 }
 \arguments{
 \item{pars_list}{A named list of named lists, one per job. Each inner list
-may have up to three elements:
+may have up to five elements:
     *  \code{pars}: named environment variables passed to the job,
     *  \code{wants}: named optional job dependencies (job ids),
-    *  \code{requires}: named required job dependencies (job ids).}
+    *  \code{requires}: named required job dependencies (job ids),
+    *  \code{allows}: named jobs permitted to depend on this one, in the same
+       form as \code{wants} and \code{requires}. Overrides the \code{allows}
+       of the report's yaml for this job,
+    *  \code{triggers}: named jobs triggered by this one, in the same form.}
 
 \item{report_name}{The report code (as shown in the Gateaux web UI).}
 
@@ -56,7 +60,9 @@ name is attached to the job as the \code{TAG} environment variable.
 \dontrun{
 pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
                          wants = list(Upstream_job = 1234),
-                         requires = list(Upstream_job2 = 4321)),
+                         requires = list(Upstream_job2 = 4321),
+                         allows = list(Downstream_report = 1234),
+                         triggers = list(Next_report = 5678)),
              Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
                          wants = list(Upstream_job = 2222),
                          requires = list(Upstream_job2 = 4321)))
