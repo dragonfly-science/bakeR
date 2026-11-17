@@ -1,10 +1,13 @@
 # One dependency-type element of the request body, e.g. , "requires":["A:1","A:2"].
-# `deps` is a named list: the names are report codes, the values job ids (several
-# per name allowed). Empty when there are none.
+# `deps` is a list: a named entry gives "<report code>:<job id>" (several ids per
+# name allowed); an unnamed entry gives the bare value, e.g. a report code, for
+# allows and triggers that name reports rather than jobs. Empty when there are none.
 .deps_json <- function(deps, key) {
   if (length(deps) == 0) return('')
+  nms <- names(deps); if (is.null(nms)) nms <- rep('', length(deps))
   items <- unlist(lapply(seq_along(deps), function(i)
-    sprintf('"%s:%s"', names(deps)[i], as.character(deps[[i]]))))
+    if (nzchar(nms[i])) sprintf('"%s:%s"', nms[i], as.character(deps[[i]]))
+    else sprintf('"%s"', as.character(deps[[i]]))))
   paste0(', "', key, '":[', paste(items, collapse = ','), ']')
 }
 
@@ -19,10 +22,12 @@
 #'     *  \code{pars}: named environment variables passed to the job,
 #'     *  \code{wants}: named optional job dependencies (job ids),
 #'     *  \code{requires}: named required job dependencies (job ids),
-#'     *  \code{allows}: named jobs permitted to depend on this one, in the same
-#'        form as \code{wants} and \code{requires}. Overrides the \code{allows}
-#'        of the report's yaml for this job,
-#'     *  \code{triggers}: named jobs triggered by this one, in the same form.
+#'     *  \code{allows}: jobs or reports permitted to depend on this one, in the
+#'        same form as \code{wants} and \code{requires} (named: report and job
+#'        id), or unnamed report codes. Overrides the \code{allows} of the
+#'        report's yaml for this job,
+#'     *  \code{triggers}: jobs or reports triggered by this one, in the same
+#'        forms as \code{allows}.
 #' @param report_name The report code (as shown in the Gateaux web UI).
 #' @param JWT String: your API key, from the API guide page of the web UI.
 #' @param server The gateaux server to use. Defaults to gateaux.io; use

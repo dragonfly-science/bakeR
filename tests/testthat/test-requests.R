@@ -204,3 +204,15 @@ test_that("tokens never appear in warnings or printed commands", {
   expect_match(run$calls, "Bearer s3cret", fixed = TRUE)
   expect_no_match(paste(run$printed, collapse = "\n"), "s3cret", fixed = TRUE)
 })
+
+test_that("allows and triggers accept bare report codes as well as report and job id", {
+  pars <- list(Run1 = list(pars = list(Env1 = "a"),
+                           allows = list("GUR2-CPUE-UPDATES", "GUR2-CPUE-DATA", Named = 5),
+                           triggers = c("Next-report")))
+  run <- with_curl(function(cmd) canned_jobs(), function() {
+    gateaux_job_runner(pars, report_name = "MyReport", JWT = "tok", log_jobs = FALSE)
+  })
+  b <- body_of(run$calls)
+  expect_equal(unlist(b$allows), c("GUR2-CPUE-UPDATES", "GUR2-CPUE-DATA", "Named:5"))
+  expect_equal(unlist(b$triggers), "Next-report")
+})

@@ -22,10 +22,12 @@ may have up to five elements:
     *  \code{pars}: named environment variables passed to the job,
     *  \code{wants}: named optional job dependencies (job ids),
     *  \code{requires}: named required job dependencies (job ids),
-    *  \code{allows}: named jobs permitted to depend on this one, in the same
-       form as \code{wants} and \code{requires}. Overrides the \code{allows}
-       of the report's yaml for this job,
-    *  \code{triggers}: named jobs triggered by this one, in the same form.}
+    *  \code{allows}: jobs or reports permitted to depend on this one, in the
+       same form as \code{wants} and \code{requires} (named: report and job
+       id), or unnamed report codes. Overrides the \code{allows} of the
+       report's yaml for this job,
+    *  \code{triggers}: jobs or reports triggered by this one, in the same
+       forms as \code{allows}.}
 
 \item{report_name}{The report code (as shown in the Gateaux web UI).}
 
