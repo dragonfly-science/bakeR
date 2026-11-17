@@ -1,7 +1,7 @@
 Package: bakeR
 Type: Package
 Title: Call the Gateaux API from R
-Version: 0.2.0
+Version: 0.3.0
 Author: Philipp Neubauer
 Maintainer: Philipp Neubauer <philipp@dragonfly.co.nz>
 Description: Launch Gateaux jobs from R with environment variables, wants and requires; list and tag jobs; download their outputs.

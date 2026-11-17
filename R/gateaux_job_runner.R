@@ -1,3 +1,16 @@
+# One dependency-type element of the request body, e.g. , "requires":["A:1","A:2"].
+# `deps` is a list: a named entry gives "<report code>:<job id>" (several ids per
+# name allowed); an unnamed entry gives the bare value, e.g. a report code, for
+# allows and triggers that name reports rather than jobs. Empty when there are none.
+.deps_json <- function(deps, key) {
+  if (length(deps) == 0) return('')
+  nms <- names(deps); if (is.null(nms)) nms <- rep('', length(deps))
+  items <- unlist(lapply(seq_along(deps), function(i)
+    if (nzchar(nms[i])) sprintf('"%s:%s"', nms[i], as.character(deps[[i]]))
+    else sprintf('"%s"', as.character(deps[[i]]))))
+  paste0(', "', key, '":[', paste(items, collapse = ','), ']')
+}
+
 #' Launch gateaux jobs from R
 #'
 #' Submits one job per element of \code{pars_list} to a report, each with its
@@ -5,10 +18,16 @@
 #' name is attached to the job as the \code{TAG} environment variable.
 #'
 #' @param pars_list A named list of named lists, one per job. Each inner list
-#' may have up to three elements:
+#' may have up to five elements:
 #'     *  \code{pars}: named environment variables passed to the job,
 #'     *  \code{wants}: named optional job dependencies (job ids),
-#'     *  \code{requires}: named required job dependencies (job ids).
+#'     *  \code{requires}: named required job dependencies (job ids),
+#'     *  \code{allows}: jobs or reports permitted to depend on this one, in the
+#'        same form as \code{wants} and \code{requires} (named: report and job
+#'        id), or unnamed report codes. Overrides the \code{allows} of the
+#'        report's yaml for this job,
+#'     *  \code{triggers}: jobs or reports triggered by this one, in the same
+#'        forms as \code{allows}.
 #' @param report_name The report code (as shown in the Gateaux web UI).
 #' @param JWT String: your API key, from the API guide page of the web UI.
 #' @param server The gateaux server to use. Defaults to gateaux.io; use
@@ -28,7 +47,9 @@
 #' \dontrun{
 #' pars <- list(Run1 = list(pars = list(Env1 = "This_env", Env2 = "That_env"),
 #'                          wants = list(Upstream_job = 1234),
-#'                          requires = list(Upstream_job2 = 4321)),
+#'                          requires = list(Upstream_job2 = 4321),
+#'                          allows = list(Downstream_report = 1234),
+#'                          triggers = list(Next_report = 5678)),
 #'              Run2 = list(pars = list(Env1 = "That_env", Env2 = "This_env"),
 #'                          wants = list(Upstream_job = 2222),
 #'                          requires = list(Upstream_job2 = 4321)))
@@ -64,27 +85,20 @@ gateaux_job_runner <- function(pars_list = NULL,
       envs = paste(tag, envs, sep=',')
     } else {envs = tag}
 
-    if(length(pars_list[[l]]$wants)>0){
-      wants = lapply(1:length(pars_list[[l]]$wants),
-                     function(ll) sprintf('"%s:%s"',names(pars_list[[l]]$wants)[ll],as.character(pars_list[[l]]$wants[ll][[1]])))
-      wants = paste(unlist(wants), collapse = ',')
-      wants = paste0(', "wants":[',wants,']')
-    } else {wants = ''}
+    wants    = .deps_json(pars_list[[l]]$wants,    "wants")
+    requires = .deps_json(pars_list[[l]]$requires, "requires")
+    allows   = .deps_json(pars_list[[l]]$allows,   "allows")
+    triggers = .deps_json(pars_list[[l]]$triggers, "triggers")
 
-    if(length(pars_list[[l]]$requires)>0){
-      requires = lapply(1:length(pars_list[[l]]$requires),
-                        function(ll) sprintf('"%s:%s"',names(pars_list[[l]]$requires)[ll],as.character(pars_list[[l]]$requires[ll][[1]])))
-      requires = paste(unlist(requires), collapse = ',')
-      requires = paste0(', "requires":[',requires,']')
-    } else {requires = ''}
-
-    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{%s%s"env":{%s} %s %s}\' %s',
+    call <- sprintf('curl -X POST -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d \'{%s%s"env":{%s} %s %s %s %s}\' %s',
                     JWT,
                     cpus,
                     memory,
                     envs,
                     wants,
                     requires,
+                    allows,
+                    triggers,
                     call_url
                     )
 
@@ -116,7 +130,7 @@ gateaux_job_runner <- function(pars_list = NULL,
 #' @param var Name(s) of the environment variable (or dependency) to create or alter.
 #' @param value Value(s) to assign, one per element of \code{var}.
 #' @param set Which part of each job to change: \code{"pars"} (the default),
-#' \code{"wants"} or \code{"requires"}.
+#' \code{"wants"}, \code{"requires"}, \code{"allows"} or \code{"triggers"}.
 #' @param rm_vals If TRUE, remove the whole \code{set} element from every job
 #' instead of setting values.
 #' @author Dragonfly bakery
